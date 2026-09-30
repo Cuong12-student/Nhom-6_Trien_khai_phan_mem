@@ -1,0 +1,134 @@
+﻿@model IEnumerable<bhgbd.Models.OrderViewModel>
+@{
+    ViewData["Title"] = "Lịch sử đơn hàng";
+    Layout = "~/Areas/Client/Views/Shared/_Layout.cshtml";
+
+    var currentStatus = Context.Request.Query["status"].ToString().Trim();
+    if (string.IsNullOrEmpty(currentStatus))
+    {
+        currentStatus = "all";
+    }
+
+    var totalCount = ViewBag.TotalCount ?? (Model?.Count() ?? 0);
+    var pendingCount = ViewBag.PendingCount ?? 0;
+    var confirmedCount = ViewBag.ConfirmedCount ?? 0;
+    var cancelledCount = ViewBag.CancelledCount ?? 0;
+}
+
+<section class="history-heading page-shell">
+    <div>
+        <span class="eyebrow">MY / ORDERS</span>
+        <h1>LỊCH SỬ ĐƠN HÀNG</h1>
+        <p>Theo dõi trạng thái và xem lại các sản phẩm đã đặt.</p>
+    </div>
+    <a href="@Url.Action("List", "Product", new { area = "Client" })">TIẾP TỤC MUA SẮM →</a>
+</section>
+
+<section class="history-page page-shell">
+    <nav class="history-tabs">
+        <a href="@Url.Action("History", "Order", new { area = "Client", status = "all" })"
+           class="history-tab-btn @(currentStatus == "all" ? "active" : "")">
+            TẤT CẢ <span>@totalCount</span>
+        </a>
+        <a href="@Url.Action("History", "Order", new { area = "Client", status = "Pending" })"
+           class="history-tab-btn @(currentStatus == "Pending" ? "active" : "")">
+            CHỜ DUYỆT <span>@pendingCount</span>
+        </a>
+        <a href="@Url.Action("History", "Order", new { area = "Client", status = "Confirmed" })"
+           class="history-tab-btn @(currentStatus == "Confirmed" ? "active" : "")">
+            ĐÃ DUYỆT <span>@confirmedCount</span>
+        </a>
+        <a href="@Url.Action("History", "Order", new { area = "Client", status = "Cancelled" })"
+           class="history-tab-btn @(currentStatus == "Cancelled" ? "active" : "")">
+            ĐÃ HỦY <span>@cancelledCount</span>
+        </a>
+    </nav>
+
+    <div class="order-list">
+        @if (Model == null || !Model.Any())
+        {
+            <div class="history-empty" style="display: block;">
+                <span>NO ORDERS</span>
+                <strong>CHƯA CÓ ĐƠN HÀNG Ở TRẠNG THÁI NÀY</strong>
+                <p>Chọn tab khác để xem lịch sử đơn hàng.</p>
+            </div>
+        }
+        else
+        {
+            @foreach (var order in Model)
+            {
+                var statusClass = order.Status switch
+                {
+                    "Pending" => "status-badge--pending",
+                    "Confirmed" => "status-badge--confirmed",
+                    "Cancelled" => "status-badge--cancelled",
+                    _ => ""
+                };
+
+                var statusText = order.Status switch
+                {
+                    "Pending" => "CHỜ DUYỆT",
+                    "Confirmed" => "ĐÃ DUYỆT",
+                    "Cancelled" => "ĐÃ HỦY",
+                    _ => order.Status
+                };
+
+                <article class="order-card">
+                    <div class="order-card__head">
+                        <div><span>MÃ ĐƠN HÀNG</span><strong>#@order.OrderCode</strong></div>
+                        <div><span>NGÀY ĐẶT</span><strong>@order.CreatedDate.ToString("dd/MM/yyyy")</strong></div>
+                        <b class="status-badge @statusClass">@statusText</b>
+                    </div>
+
+                    <div class="order-card__body">
+                        <!-- Danh sách ảnh sản phẩm đại diện xử lý đường dẫn an toàn -->
+                        <div class="order-product-stack">
+                            @if (order.Items != null)
+                            {
+                                @foreach (var item in order.Items.Take(3))
+                                {
+                                    string itemImg = item.Image ?? "";
+                                    if (!string.IsNullOrEmpty(itemImg) && !itemImg.StartsWith("http") && !itemImg.StartsWith("/client"))
+                                    {
+                                        itemImg = "/client" + (itemImg.StartsWith("/") ? "" : "/") + itemImg;
+                                    }
+                                    if (string.IsNullOrEmpty(itemImg))
+                                    {
+                                        itemImg = "/client/images/products/default.webp";
+                                    }
+                                    <img src="@itemImg" alt="@item.ProductName" />
+                                }
+                            }
+                        </div>
+
+                        <div class="order-card__summary">
+                            <strong>@order.TotalQuantity sản phẩm</strong>
+                            <span>@order.SummaryText</span>
+                        </div>
+
+                        <div class="order-card__total">
+                            <span>TỔNG TIỀN</span>
+                            <strong>@order.GrandTotalFormatted</strong>
+                        </div>
+
+                        <div class="order-card__actions">
+                            <a class="button button--dark" style="padding: 8px 16px; font-size: 13px; text-decoration: none;"
+                               href="@Url.Action("OrderDetail", "Order", new { area = "Client", id = order.Id })">
+                                XEM CHI TIẾT
+                            </a>
+
+                            @if (order.Status == "Pending")
+                            {
+                                <form action="@Url.Action("CancelOrder", "Order", new { area = "Client" })" method="post" style="display:inline;" onsubmit="return confirm('Bạn có chắc chắn muốn hủy đơn hàng này?');">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="orderId" value="@order.Id" />
+                                    <button class="danger" type="submit">YÊU CẦU HỦY</button>
+                                </form>
+                            }
+                        </div>
+                    </div>
+                </article>
+            }
+        }
+    </div>
+</section>

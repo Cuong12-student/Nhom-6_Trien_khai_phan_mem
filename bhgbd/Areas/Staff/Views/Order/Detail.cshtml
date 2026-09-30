@@ -1,0 +1,147 @@
+﻿@model bhgbd.Models.Order
+@{
+    ViewData["Title"] = $"Chi tiết Đơn hàng #ORD-{Model.orderId}";
+    Layout = "~/Areas/Staff/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <a asp-area="Staff" asp-controller="Order" asp-action="Index" class="text-decoration-none text-muted mb-1 d-inline-block">
+                <i class="bi bi-arrow-left"></i> Quay lại danh sách
+            </a>
+            <h2 class="fw-bold text-dark m-0">Đơn hàng #ORD-@Model.orderId</h2>
+        </div>
+        <div>
+            <span class="badge bg-warning text-dark fs-6 px-3 py-2">Trạng thái: @Model.status</span>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Cột Trái: Danh sách Sản phẩm đóng gói -->
+        <div class="col-12 col-lg-8">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-bag-check me-2 text-primary"></i>Sản phẩm đóng gói (OrderDetail)</h5>
+                </div>
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Sản phẩm</th>
+                                <th>Biến thể (Size / Loại đinh)</th>
+                                <th>Đơn giá</th>
+                                <th class="text-center">Số lượng</th>
+                                <th class="text-end">Thành tiền</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.OrderDetails != null && Model.OrderDetails.Any())
+                            {
+                                @foreach (var detail in Model.OrderDetails)
+                                {
+                                    var variant = detail.ProductVariant;
+                                    var product = variant?.Product;
+
+                                    string imgUrl = product?.imageUrl ?? "";
+                                    if (!string.IsNullOrEmpty(imgUrl) && !imgUrl.StartsWith("http") && !imgUrl.StartsWith("/client"))
+                                    {
+                                        imgUrl = "/client" + (imgUrl.StartsWith("/") ? "" : "/") + imgUrl;
+                                    }
+                                    if (string.IsNullOrEmpty(imgUrl))
+                                    {
+                                        imgUrl = "/client/images/products/default.webp";
+                                    }
+
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <img src="@imgUrl" alt="@(product?.productName)" class="rounded border me-3" style="width: 50px; height: 50px; object-fit: cover;" />
+                                                <div>
+                                                    <div class="fw-bold text-dark">@(product?.productName ?? "Sản phẩm")</div>
+                                                    <span class="small text-muted">Mã SP: #@detail.variantId</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-light text-dark border">Size: @(variant?.size)</span>
+                                            <span class="badge bg-light text-dark border">Đế: @(variant?.soleType ?? "TF")</span>
+                                        </td>
+                                        <td>@detail.price.ToString("N0") đ</td>
+                                        <td class="text-center fw-bold">@detail.quantity</td>
+                                        <td class="text-end fw-bold">@((detail.price * detail.quantity).ToString("N0")) đ</td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted py-3">Không có sản phẩm nào trong chi tiết đơn hàng.</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <div class="card-body bg-light rounded-bottom text-end">
+                    <span class="text-muted fs-6 me-3">Tổng thanh toán:</span>
+                    <span class="fs-4 fw-bold text-danger">@Model.total.ToString("N0") đ</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cột Phải: Thông tin Khách & Thao tác trạng thái -->
+        <div class="col-12 col-lg-4">
+            <!-- Khối Cập nhật Trạng thái -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-gear me-2 text-primary"></i>Xử lý Đơn hàng</h5>
+                </div>
+                <div class="card-body">
+                    <form asp-area="Staff" asp-controller="Order" asp-action="UpdateStatus" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="orderId" value="@Model.orderId" />
+                        <div class="mb-3">
+                            <label class="form-label text-muted small fw-bold">CẬP NHẬT TRẠNG THÁI</label>
+                            <select name="status" class="form-select fw-bold text-dark" asp-items="Html.GetEnumSelectList<bhgbd.Models.OrderStatus>()">
+                            </select>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success fw-bold py-2"><i class="bi bi-check-lg"></i> Cập nhật ngay</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Khối Thông tin Khách & Giao hàng -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-person me-2 text-primary"></i>Thông tin Giao hàng</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <span class="text-muted small d-block">Người nhận:</span>
+                        <strong class="text-dark fs-6">@Model.receiverName</strong>
+                    </div>
+                    <div class="mb-3">
+                        <span class="text-muted small d-block">Số điện thoại:</span>
+                        <strong class="text-dark">@Model.receiverPhone</strong>
+                    </div>
+                    <div class="mb-3">
+                        <span class="text-muted small d-block">Địa chỉ giao hàng:</span>
+                        <span class="text-dark">@Model.receiverAddress</span>
+                    </div>
+                    <hr class="text-muted" />
+                    <div class="mb-2">
+                        <span class="text-muted small d-block">Ngày đặt hàng:</span>
+                        <span class="text-dark">@Model.orderDate.ToString("dd/MM/yyyy - HH:mm")</span>
+                    </div>
+                    <div>
+                        <span class="text-muted small d-block">Nhân viên phụ trách:</span>
+                        <span class="badge bg-secondary">@(Model.Staff != null ? Model.Staff.staffId.ToString() : "Chưa phân công")</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

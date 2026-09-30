@@ -1,0 +1,249 @@
+﻿@model IEnumerable<bhgbd.Models.Staff>
+@using System.Text.Encodings.Web
+@{
+    ViewData["Title"] = "Quản lý Nhân viên";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold mb-0 text-dark"><i class="bi bi-person-badge-fill text-danger me-2"></i>Quản Lý Nhân Viên</h2>
+        <p class="text-muted small mb-0">Cấp tài khoản và quản lý danh sách nhân viên bán hàng/kho</p>
+    </div>
+    <button type="button" class="btn btn-danger fw-semibold" data-bs-toggle="modal" data-bs-target="#addStaffModal">
+        <i class="bi bi-person-plus-fill me-1"></i> + Cấp Tài Khoản Nhân Viên Mới
+    </button>
+</div>
+
+<!-- ALERT NOTIFICATIONS -->
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>@TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<!-- STAFF TABLE -->
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th class="ps-3">Mã NV</th>
+                        <th>Họ Và Tên</th>
+                        <th>Tên Đăng Nhập</th>
+                        <th>Số Điện Thoại</th>
+                        <th>Email</th>
+                        <th>Địa Chỉ</th>
+                        <th class="text-end pe-3">Thao Tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center py-4 text-muted">Chưa có nhân viên nào. Bấm nút "+ Cấp Tài Khoản Nhân Viên Mới" để thêm!</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        foreach (var s in Model)
+                        {
+                            <tr>
+                                <td class="ps-3 fw-bold text-secondary">#NV-@s.staffId</td>
+                                <td>
+                                    <div class="fw-bold text-dark">@s.staffName</div>
+                                    <small class="text-muted">Tuổi: @s.age | Giới tính: @s.gender</small>
+                                </td>
+                                <td>
+                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle fw-semibold px-2 py-1">
+                                        <i class="bi bi-person-fill me-1"></i>@(s.User?.username ?? "Chưa rõ")
+                                    </span>
+                                </td>
+                                <td class="fw-medium">@s.phone</td>
+                                <td class="text-muted">@s.email</td>
+                                <td class="text-muted text-truncate" style="max-width: 180px;">@s.address</td>
+                                <td class="text-end pe-3">
+                                    <div class="btn-group btn-group-sm">
+                                        <button class="btn btn-outline-primary"
+                                                onclick="openEditStaffModal(@s.staffId, '@s.staffName', '@s.email', '@s.phone', '@JavaScriptEncoder.Default.Encode(s.address)', @s.age)"
+                                                title="Sửa thông tin">
+                                            <i class="bi bi-pencil-square"></i> Sửa
+                                        </button>
+                                        <button class="btn btn-outline-warning"
+                                                onclick="openResetPwdModal(@s.userId, '@(s.User?.username ?? "")', '@s.staffName')"
+                                                title="Đặt lại mật khẩu">
+                                            <i class="bi bi-key-fill"></i> Reset Mật Khẩu
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL CẤP TÀI KHOẢN NHÂN VIÊN MỚI -->
+<div class="modal fade" id="addStaffModal" tabindex="-1" aria-labelledby="addStaffModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form asp-area="Admin" asp-controller="Staff" asp-action="Create" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title fw-bold" id="addStaffModalLabel"><i class="bi bi-person-plus-fill me-2"></i>Cấp Tài Khoản Nhân Viên Mới</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body row g-3">
+                    <div class="col-12"><h6 class="fw-bold text-danger border-bottom pb-1"><i class="bi bi-shield-lock me-1"></i> Thông Tin Đăng Nhập</h6></div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Tên Đăng Nhập (Username) <span class="text-danger">*</span></label>
+                        <input type="text" name="username" class="form-control" placeholder="VD: nv_nam" required />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Mật Khẩu Mặc Định <span class="text-danger">*</span></label>
+                        <input type="password" name="password" class="form-control" placeholder="Nhập mật khẩu..." required />
+                    </div>
+
+                    <div class="col-12 mt-4"><h6 class="fw-bold text-danger border-bottom pb-1"><i class="bi bi-person-lines-fill me-1"></i> Thông Tin Sơ Yếu Lý Lịch</h6></div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Họ Và Tên <span class="text-danger">*</span></label>
+                        <input type="text" name="staffName" class="form-control" placeholder="VD: Nguyễn Văn A" required />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Số Điện Thoại</label>
+                        <input type="text" name="phone" class="form-control" placeholder="VD: 0912345678" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Email</label>
+                        <input type="email" name="email" class="form-control" placeholder="VD: staff@bhgbd.com" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold">Tuổi</label>
+                        <input type="number" name="age" class="form-control" value="25" min="18" max="70" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold">Giới Tính</label>
+                        <select name="gender" class="form-select">
+                            <option value="Nam">Nam</option>
+                            <option value="Nữ">Nữ</option>
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Địa Chỉ</label>
+                        <input type="text" name="address" class="form-control" placeholder="Nhập địa chỉ nhà / tạm trú..." />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-danger fw-semibold"><i class="bi bi-check-circle me-1"></i> Tạo Tài Khoản</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL SỬA THÔNG TIN NHÂN VIÊN -->
+<div class="modal fade" id="editStaffModal" tabindex="-1" aria-labelledby="editStaffModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form asp-area="Admin" asp-controller="Staff" asp-action="Edit" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" id="editStaffId" name="staffId" />
+                <div class="modal-header bg-dark text-white">
+                    <h5 class="modal-title fw-bold" id="editStaffModalLabel"><i class="bi bi-pencil-square me-2"></i>Chỉnh Sửa Hồ Sơ Nhân Viên</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Họ Và Tên <span class="text-danger">*</span></label>
+                        <input type="text" id="editStaffName" name="staffName" class="form-control" required />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Số Điện Thoại</label>
+                        <input type="text" id="editStaffPhone" name="phone" class="form-control" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Email</label>
+                        <input type="email" id="editStaffEmail" name="email" class="form-control" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Tuổi</label>
+                        <input type="number" id="editStaffAge" name="age" class="form-control" min="18" max="70" />
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Địa Chỉ</label>
+                        <input type="text" id="editStaffAddress" name="address" class="form-control" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary fw-semibold"><i class="bi bi-check-circle me-1"></i> Cập Nhật</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL RESET MẬT KHẨU -->
+<div class="modal fade" id="resetPwdModal" tabindex="-1" aria-labelledby="resetPwdModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-area="Admin" asp-controller="Staff" asp-action="ResetPassword" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" id="resetUserId" name="userId" />
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title fw-bold" id="resetPwdModalLabel"><i class="bi bi-key-fill me-2"></i>Đặt Lai Mật Khẩu</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-2">Tài khoản: <strong id="resetUsernameText" class="text-primary"></strong> (<span id="resetStaffNameText"></span>)</p>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Mật Khẩu Mới <span class="text-danger">*</span></label>
+                        <input type="password" name="newPassword" class="form-control" placeholder="Nhập mật khẩu mới..." required />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-warning fw-semibold"><i class="bi bi-check-lg me-1"></i> Đổi Mật Khẩu</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function openEditStaffModal(id, name, email, phone, address, age) {
+            document.getElementById('editStaffId').value = id;
+            document.getElementById('editStaffName').value = name;
+            document.getElementById('editStaffEmail').value = email;
+            document.getElementById('editStaffPhone').value = phone;
+            document.getElementById('editStaffAddress').value = address;
+            document.getElementById('editStaffAge').value = age;
+
+            var modal = new bootstrap.Modal(document.getElementById('editStaffModal'));
+            modal.show();
+        }
+
+        function openResetPwdModal(userId, username, staffName) {
+            document.getElementById('resetUserId').value = userId;
+            document.getElementById('resetUsernameText').innerText = username;
+            document.getElementById('resetStaffNameText').innerText = staffName;
+
+            var modal = new bootstrap.Modal(document.getElementById('resetPwdModal'));
+            modal.show();
+        }
+    </script>
+}

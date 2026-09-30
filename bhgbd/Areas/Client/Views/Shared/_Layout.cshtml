@@ -1,0 +1,128 @@
+﻿@using Microsoft.AspNetCore.Http
+@using System.Text.Json
+@using bhgbd.Models
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    var pageTitle = ViewData["Title"] as string ?? "BHGBD Store";
+    int cartCount = 0;
+    var cartJson = HttpContextAccessor.HttpContext?.Session.GetString("CLIENT_CART");
+    if (!string.IsNullOrEmpty(cartJson))
+    {
+        try
+        {
+            var cart = JsonSerializer.Deserialize<CartViewModel>(cartJson);
+            if (cart != null && cart.Items != null)
+            {
+                cartCount = cart.Items.Sum(i => i.Quantity);
+            }
+        }
+        catch { }
+    }
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@pageTitle - BHGBD Store</title>
+    <link rel="stylesheet" href="~/css/Customer.css" />
+</head>
+<body>
+    <div class="announcement-bar">
+        <span>Miễn phí vận chuyển cho đơn từ 2.000.000đ</span>
+        <span>Đổi size trong 7 ngày</span>
+        <span>Cam kết sản phẩm chính hãng</span>
+    </div>
+
+    <header class="site-header" data-site-header>
+        <div class="header-shell">
+            <a class="brand" href="@Url.Action("Index", "Home", new { area = "Client" })" aria-label="BHGBD Store">
+                <span class="brand-mark"><i></i><i></i><i></i></span>
+                <span>BHGBD<span>STORE</span></span>
+            </a>
+
+            <button class="mobile-menu-button" type="button" data-mobile-menu aria-label="Mở menu"><span></span><span></span><span></span></button>
+
+            <nav class="main-nav" data-main-nav>
+                <a href="@Url.Action("Index", "Home", new { area = "Client" })">TRANG CHỦ</a>
+                <a href="@Url.Action("List", "Product", new { area = "Client" })">SẢN PHẨM</a>
+                <a href="@Url.Action("List", "Product", new { area = "Client", sole = "TF" })">GIÀY TF</a>
+                <a href="@Url.Action("List", "Product", new { area = "Client", sole = "FG" })">GIÀY FG</a>
+                <a href="@Url.Action("History", "Order", new { area = "Client" })">ĐƠN HÀNG</a>
+            </nav>
+
+            <div class="header-actions">
+                <button class="header-search-button" type="button" data-search-toggle aria-label="Tìm kiếm">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg>
+                </button>
+                <a class="header-account" href="@Url.Action("Login", "Auth", new { area = "" })">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c.8-4 3.5-6 8-6s7.2 2 8 6"></path></svg>
+                    <span>TÀI KHOẢN</span>
+                </a>
+                <a class="header-cart" href="@Url.Action("Index", "Cart", new { area = "Client" })">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h2l2.3 10.2a2 2 0 0 0 2 1.6h7.8a2 2 0 0 0 2-1.6L21 7H7"></path><circle cx="10" cy="20" r="1"></circle><circle cx="18" cy="20" r="1"></circle></svg>
+                    <span>GIỎ HÀNG</span>
+                    <b data-cart-count>@cartCount</b>
+                </a>
+            </div>
+        </div>
+
+        <div class="search-panel" data-search-panel>
+            <form action="@Url.Action("List", "Product", new { area = "Client" })" method="get">
+                <input type="search" name="search" placeholder="Tìm tên giày, thương hiệu, loại đế..." autocomplete="off" />
+                <button type="submit">TÌM KIẾM →</button>
+                <button type="button" data-search-close aria-label="Đóng">×</button>
+            </form>
+        </div>
+    </header>
+
+    <main class="page-main">
+        @RenderBody()
+    </main>
+
+    <section class="member-strip">
+        <div>
+            <span>BHGBD MEMBERS</span>
+            <strong>ĐĂNG NHẬP ĐỂ THEO DÕI ĐƠN HÀNG NHANH HƠN</strong>
+        </div>
+        <a href="@Url.Action("Login", "Auth", new { area = "" })">ĐĂNG NHẬP →</a>
+    </section>
+
+    <footer class="site-footer">
+        <div class="footer-grid">
+            <div class="footer-brand">
+                <a class="brand brand--footer" href="@Url.Action("Index", "Home", new { area = "Client" })">
+                    <span class="brand-mark"><i></i><i></i><i></i></span>
+                    <span>BHGBD<span>STORE</span></span>
+                </a>
+                <p>Không gian mua sắm giày bóng đá dành cho người chơi yêu tốc độ, kiểm soát và cảm giác bóng.</p>
+            </div>
+            <div>
+                <h3>SẢN PHẨM</h3>
+                <a href="@Url.Action("List", "Product", new { area = "Client", sole = "TF" })">Giày cỏ nhân tạo TF</a>
+                <a href="@Url.Action("List", "Product", new { area = "Client", sole = "FG" })">Giày cỏ tự nhiên FG</a>
+                <a href="@Url.Action("List", "Product", new { area = "Client", sole = "IC" })">Giày futsal IC</a>
+                <a href="@Url.Action("List", "Product", new { area = "Client", category = "accessory" })">Phụ kiện bóng đá</a>
+            </div>
+            <div>
+                <h3>KHÁCH HÀNG</h3>
+                <a href="@Url.Action("Cart", "Cart", new { area = "Client" })">Giỏ hàng</a>
+                <a href="@Url.Action("Checkout", "Order", new { area = "Client" })">Thanh toán</a>
+                <a href="@Url.Action("History", "Order", new { area = "Client" })">Lịch sử đơn hàng</a>
+                <a href="@Url.Action("Login", "Auth", new { area = "" })">Đăng nhập</a>
+            </div>
+            <div>
+                <h3>HỖ TRỢ</h3>
+                <span>Hotline: 1900 6868</span>
+                <span>Email: support@bhgbd.vn</span>
+                <span>Thứ 2 - Chủ nhật</span>
+                <span>08:00 - 22:00</span>
+            </div>
+        </div>
+        <div class="footer-bottom"><span>© 2026 BHGBD Store</span><span>Giao diện Client phục vụ đồ án môn Lập trình Web</span></div>
+    </footer>
+    <div class="site-toast" data-site-toast></div>
+    <script src="/js/client.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

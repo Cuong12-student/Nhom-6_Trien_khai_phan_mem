@@ -1,0 +1,105 @@
+<!-- Modal: Điều khoản dịch vụ -->
+<div class="modal-overlay" id="modal-terms">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3>Điều khoản dịch vụ</h3>
+            <button type="button" class="modal-close" onclick="closeAuthModal('modal-terms')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <h4>1. Chấp nhận điều khoản</h4>
+            <p>
+                Khi tạo tài khoản hoặc sử dụng dịch vụ của ShoesShop, bạn đồng ý tuân thủ các điều khoản
+                được nêu dưới đây. Vui lòng đọc kỹ trước khi tiếp tục.
+            </p>
+
+            <h4>2. Tài khoản người dùng</h4>
+            <p>
+                Bạn có trách nhiệm bảo mật thông tin đăng nhập của mình và chịu trách nhiệm cho mọi hoạt
+                động diễn ra dưới tài khoản đã đăng ký.
+            </p>
+
+            <h4>3. Đặt hàng và thanh toán</h4>
+            <p>
+                Mọi đơn hàng phải được thanh toán đầy đủ theo phương thức được hỗ trợ trên website.
+                ShoesShop có quyền từ chối hoặc hủy đơn hàng trong trường hợp phát hiện gian lận.
+            </p>
+
+            <h4>4. Thay đổi điều khoản</h4>
+            <p>
+                ShoesShop có thể cập nhật điều khoản dịch vụ theo thời gian. Việc tiếp tục sử dụng dịch vụ
+                sau khi thay đổi đồng nghĩa với việc bạn chấp nhận các điều khoản mới.
+            </p>
+
+            <p><em>(Đây là nội dung mẫu — bạn nên thay bằng điều khoản thực tế của cửa hàng.)</em></p>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Chính sách bảo mật -->
+<div class="modal-overlay" id="modal-privacy">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3>Chính sách bảo mật</h3>
+            <button type="button" class="modal-close" onclick="closeAuthModal('modal-privacy')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <h4>1. Thông tin thu thập</h4>
+            <p>
+                Chúng tôi thu thập họ tên, email, số điện thoại và địa chỉ giao hàng khi bạn đăng ký tài
+                khoản hoặc đặt hàng, nhằm phục vụ việc xử lý đơn hàng và chăm sóc khách hàng.
+            </p>
+
+            <h4>2. Mục đích sử dụng</h4>
+            <p>
+                Thông tin cá nhân được dùng để xác thực tài khoản, xử lý giao dịch, gửi thông báo đơn hàng
+                và cải thiện trải nghiệm mua sắm của bạn.
+            </p>
+
+            <h4>3. Chia sẻ thông tin</h4>
+            <p>
+                ShoesShop không bán hoặc cho thuê thông tin cá nhân của bạn cho bên thứ ba, ngoại trừ các
+                đối tác vận chuyển cần thiết để giao hàng.
+            </p>
+
+            <h4>4. Bảo mật dữ liệu</h4>
+            <p>
+                Chúng tôi áp dụng các biện pháp kỹ thuật hợp lý để bảo vệ thông tin của bạn khỏi truy cập
+                trái phép, mất mát hoặc rò rỉ dữ liệu.
+            </p>
+
+            <p><em>(Đây là nội dung mẫu — bạn nên thay bằng chính sách bảo mật thực tế của cửa hàng.)</em></p>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openAuthModal(id) {
+        var el = document.getElementById(id);
+        if (el) {
+            el.classList.add('is-open');
+        }
+    }
+
+    function closeAuthModal(id) {
+        var el = document.getElementById(id);
+        if (el) {
+            el.classList.remove('is-open');
+        }
+    }
+
+    // Đóng modal khi bấm ra ngoài vùng nội dung
+    document.addEventListener('click', function (e) {
+        if (e.target.classList && e.target.classList.contains('modal-overlay')) {
+            e.target.classList.remove('is-open');
+        }
+    });
+
+    // Đóng modal khi nhấn phím Esc
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+            document.querySelectorAll('.modal-overlay.is-open').forEach(function (el) {
+                el.classList.remove('is-open');
+            });
+        }
+    });
+</script>

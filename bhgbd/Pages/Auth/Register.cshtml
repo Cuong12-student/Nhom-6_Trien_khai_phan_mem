@@ -1,0 +1,141 @@
+﻿@page
+@model bhgbd.Pages.Auth.RegisterModel
+@{
+    ViewData["Title"] = "Đăng ký";
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@ViewData["Title"] - ShoesShop</title>
+    <link rel="stylesheet" href="~/css/auth.css" />
+</head>
+<body>
+
+    <header class="site-header">
+        <a href="/" class="brand">
+            <span class="logo-box">👟</span>
+            ShoesShop
+            <span class="page-label">Đăng ký</span>
+        </a>
+        <a href="javascript:void(0)" class="help-link" onclick="openAuthModal('modal-help')">Bạn cần giúp đỡ?</a>
+    </header>
+
+    <div class="auth-banner">
+        <div class="auth-banner-inner">
+
+            <div class="auth-card-float auth-card-wide">
+                <h2 class="auth-title">Đăng ký tài khoản</h2>
+
+                @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+                {
+                    <div class="auth-alert auth-alert-error">
+                        @Model.ErrorMessage
+                    </div>
+                }
+
+                <form method="post" novalidate>
+                    @Html.AntiForgeryToken()
+                    <div asp-validation-summary="ModelOnly" class="auth-alert auth-alert-error"></div>
+
+                    <h3 class="form-section-title">Thông tin khách hàng</h3>
+
+                    <div class="form-group">
+                        <label asp-for="Input.CustomerName"></label>
+                        <input asp-for="Input.CustomerName" class="form-control" placeholder="Họ và tên" autocomplete="name" />
+                        <span asp-validation-for="Input.CustomerName" class="field-error"></span>
+                    </div>
+
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label asp-for="Input.Age"></label>
+                            <input asp-for="Input.Age" type="number" min="10" max="100" class="form-control" placeholder="Tuổi" />
+                            <span asp-validation-for="Input.Age" class="field-error"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="Input.Gender"></label>
+                            <select asp-for="Input.Gender" class="form-control">
+                                <option value="">-- Chọn giới tính --</option>
+                                <option value="Nam">Nam</option>
+                                <option value="Nữ">Nữ</option>
+                                <option value="Khác">Khác</option>
+                            </select>
+                            <span asp-validation-for="Input.Gender" class="field-error"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Input.Email"></label>
+                        <input asp-for="Input.Email" class="form-control" placeholder="Email" autocomplete="email" />
+                        <span asp-validation-for="Input.Email" class="field-error"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Input.Address"></label>
+                        <input asp-for="Input.Address" class="form-control" placeholder="Địa chỉ" autocomplete="street-address" />
+                        <span asp-validation-for="Input.Address" class="field-error"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Input.PhoneNumber"></label>
+                        <input asp-for="Input.PhoneNumber" class="form-control" placeholder="Số điện thoại" autocomplete="tel" />
+                        <span asp-validation-for="Input.PhoneNumber" class="field-error"></span>
+                    </div>
+
+                    <h3 class="form-section-title">Thông tin tài khoản</h3>
+
+                    <div class="form-group">
+                        <label asp-for="Input.Username"></label>
+                        <input asp-for="Input.Username" class="form-control" placeholder="Username" autocomplete="username" />
+                        <span asp-validation-for="Input.Username" class="field-error"></span>
+                    </div>
+
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label asp-for="Input.Password"></label>
+                            <input asp-for="Input.Password" class="form-control" placeholder="Mật khẩu" autocomplete="new-password" />
+                            <span asp-validation-for="Input.Password" class="field-error"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="Input.ConfirmPassword"></label>
+                            <input asp-for="Input.ConfirmPassword" class="form-control" placeholder="Nhập lại mật khẩu" autocomplete="new-password" />
+                            <span asp-validation-for="Input.ConfirmPassword" class="field-error"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input asp-for="Input.AgreeTerms" type="checkbox" value="true" />
+                            <span>Tôi đồng ý với <a href="javascript:void(0)" class="auth-link" onclick="openAuthModal('modal-terms')">Điều khoản dịch vụ</a> &amp; <a href="javascript:void(0)" class="auth-link" onclick="openAuthModal('modal-privacy')">Chính sách bảo mật</a></span>
+                        </label>
+                        <span asp-validation-for="Input.AgreeTerms" class="field-error"></span>
+                    </div>
+
+                    <button type="submit" class="btn-primary">ĐĂNG KÝ</button>
+                </form>
+
+                <div class="auth-divider">HOẶC</div>
+
+                <div class="social-buttons">
+                    <a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer" class="btn-social">Facebook</a>
+                    <a href="https://accounts.google.com/signin/v2/usernamerecovery?hl=vi&flowName=GlifWebSignIn&flowEntry=ServiceLogin" target="_blank" rel="noopener noreferrer" class="btn-social">Google</a>
+                </div>
+
+                <p class="auth-footer">
+                    Đã có tài khoản?
+                    <a asp-page="/Auth/Login" class="auth-link">Đăng nhập</a>
+                </p>
+            </div>
+
+        </div>
+    </div>
+
+    <partial name="_ValidationScriptsPartial" />
+    <partial name="_TermsModals" />
+    <partial name="HelpModal" />
+</body>
+</html>

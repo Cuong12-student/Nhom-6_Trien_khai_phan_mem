@@ -1,0 +1,443 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+    background: #f5f5f5;
+    color: #222;
+}
+
+/* ===== Header trên cùng ===== */
+.site-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #fff;
+    padding: 14px 40px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+.site-header .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 20px;
+    font-weight: 700;
+    color: #222;
+    text-decoration: none;
+}
+
+.site-header .brand .logo-box {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #ff6b35, #ee4d2d);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 18px;
+}
+
+.site-header .page-label {
+    font-weight: 400;
+    color: #555;
+    margin-left: 4px;
+    font-size: 18px;
+}
+
+.site-header .help-link {
+    color: #ee4d2d;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.site-header .help-link:hover {
+    text-decoration: underline;
+}
+
+/* ===== Vùng nền ảnh + card =====
+   ĐỂ ĐỔI ẢNH NỀN: đặt file ảnh vào wwwroot/images/ (ví dụ auth-bg.jpg),
+   rồi sửa đường dẫn trong url(...) bên dưới cho đúng tên file bạn dùng.
+   Lớp linear-gradient phía trước ảnh chỉ để chữ/card nổi rõ hơn trên nền ảnh;
+   có thể chỉnh độ mờ (opacity trong rgba) hoặc xóa hẳn nếu không cần. */
+.auth-banner {
+    background-color: #ee4d2d; /* màu dự phòng khi ảnh chưa load được */
+    background-image:
+        linear-gradient(135deg, rgba(0, 0, 0, 0.25) 0%, rgba(0, 0, 0, 0.35) 100%),
+        url('/auth/football.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    min-height: calc(100vh - 62px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+}
+
+.auth-banner-inner {
+    width: 100%;
+    max-width: 1100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 40px;
+}
+
+/* Card trắng nổi bên phải */
+.auth-card-float {
+    flex: 0 1 400px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+    padding: 34px 32px;
+    max-width: 400px;
+    width: 100%;
+}
+
+.auth-card-wide {
+    flex-basis: 460px;
+    max-width: 460px;
+}
+
+.auth-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #222;
+    margin: 0 0 20px;
+}
+
+.form-section-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #ee4d2d;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin: 22px 0 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #f0e4e0;
+}
+
+.form-section-title:first-of-type {
+    margin-top: 4px;
+}
+
+.auth-alert {
+    padding: 10px 14px;
+    border-radius: 4px;
+    font-size: 13.5px;
+    margin-bottom: 16px;
+}
+
+.auth-alert-error {
+    background: #fff1f0;
+    color: #cf1322;
+    border: 1px solid #ffa39e;
+}
+
+.auth-alert:empty {
+    display: none;
+}
+
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: #555;
+    margin-bottom: 6px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 11px 12px;
+    border: 1px solid #d9d9d9;
+    border-radius: 2px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.form-control:focus {
+    border-color: #ee4d2d;
+}
+
+.field-error {
+    display: block;
+    color: #cf1322;
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+.form-row-between {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+    font-size: 13px;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 13px;
+    color: #555;
+    cursor: pointer;
+    font-weight: 400;
+}
+
+.checkbox-label input {
+    margin-top: 2px;
+    accent-color: #ee4d2d;
+}
+
+.auth-link {
+    color: #ee4d2d;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.auth-link:hover {
+    text-decoration: underline;
+}
+
+.btn-primary {
+    width: 100%;
+    padding: 12px;
+    background: #ee4d2d;
+    color: #fff;
+    border: none;
+    border-radius: 2px;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+}
+
+.btn-primary:hover {
+    background: #d8431f;
+}
+
+.btn-primary:active {
+    transform: scale(0.99);
+}
+
+.auth-divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    color: #999;
+    font-size: 12px;
+    margin: 20px 0;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+    content: "";
+    flex: 1;
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.auth-divider:not(:empty)::before {
+    margin-right: 10px;
+}
+
+.auth-divider:not(:empty)::after {
+    margin-left: 10px;
+}
+
+.social-buttons {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.btn-social {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 9px;
+    border: 1px solid #d9d9d9;
+    border-radius: 2px;
+    background: #fff;
+    color: #333;
+    font-size: 13.5px;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.btn-social:hover {
+    background: #fafafa;
+}
+
+.auth-terms {
+    font-size: 12px;
+    color: #888;
+    text-align: center;
+    line-height: 1.6;
+    margin-bottom: 4px;
+}
+
+.auth-footer {
+    text-align: center;
+    font-size: 13.5px;
+    color: #555;
+    margin-top: 16px;
+    margin-bottom: 0;
+}
+
+@media (max-width: 900px) {
+    .auth-banner-inner {
+        justify-content: center;
+    }
+
+    .auth-card-float {
+        max-width: 100%;
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .site-header {
+        padding: 12px 18px;
+    }
+
+    .auth-banner {
+        padding: 20px 14px;
+    }
+
+    .auth-card-float {
+        padding: 24px 20px;
+    }
+
+    .form-grid-2 {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+}
+
+/* ===== Modal Điều khoản / Chính sách / Hỗ trợ ===== */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.modal-overlay.is-open {
+    display: flex;
+    opacity: 1;
+}
+
+.modal-box {
+    background: #fff;
+    width: 100%;
+    max-width: 620px;
+    max-height: 80vh;
+    border-radius: 8px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transform: translateY(-16px) scale(0.98);
+    opacity: 0;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.modal-overlay.is-open .modal-box {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 24px;
+    border-bottom: 1px solid #eee;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #222;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 22px;
+    line-height: 1;
+    color: #888;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+.modal-close:hover {
+    background: #f2f2f2;
+    color: #222;
+}
+
+.modal-body {
+    padding: 20px 24px;
+    overflow-y: auto;
+    font-size: 14px;
+    line-height: 1.7;
+    color: #444;
+}
+
+.modal-body h4 {
+    font-size: 15px;
+    color: #222;
+    margin: 18px 0 6px;
+}
+
+.modal-body h4:first-child {
+    margin-top: 0;
+}
+
+.modal-body p {
+    margin: 0 0 10px;
+}
+
+.faq-item {
+    padding: 12px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.faq-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.faq-item h4 {
+    margin: 0 0 6px;
+}
+
+.faq-item p {
+    margin: 0;
+}

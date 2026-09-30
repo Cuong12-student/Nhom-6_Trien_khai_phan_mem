@@ -1,0 +1,336 @@
+﻿@model IEnumerable<bhgbd.Models.Product>
+@using System.Text.Encodings.Web
+@{
+    ViewData["Title"] = "Quản lý Sản phẩm";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+    var categories = ViewBag.Categories as List<bhgbd.Models.Category> ?? new List<bhgbd.Models.Category>();
+    var searchString = ViewBag.SearchString as string;
+    var selectedCategoryId = ViewBag.SelectedCategoryId as int?;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold mb-0 text-dark"><i class="bi bi-box-seam-fill text-danger me-2"></i>Quản Lý Sản Phẩm</h2>
+        <p class="text-muted small mb-0">Danh sách giày bóng đá, phụ kiện và quản lý các biến thể size/đinh</p>
+    </div>
+    <button type="button" class="btn btn-danger fw-semibold" data-bs-toggle="modal" data-bs-target="#addProductModal">
+        <i class="bi bi-plus-circle me-1"></i> Thêm Sản Phẩm Mới
+    </button>
+</div>
+
+<!-- ALERT NOTIFICATIONS -->
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>@TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<!-- TOOLBAR: SEARCH & FILTER -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body bg-white rounded-3 p-3">
+        <form asp-area="Admin" asp-controller="Product" asp-action="Product" method="get" class="row g-2 align-items-center">
+            <div class="col-12 col-md-5">
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+                    <input type="text" name="searchString" value="@searchString" class="form-control border-start-0" placeholder="Tìm kiếm theo tên hoặc mô tả sản phẩm..." />
+                </div>
+            </div>
+            <div class="col-12 col-md-4">
+                <select name="categoryId" class="form-select">
+                    <option value="">-- Tất cả danh mục --</option>
+                    @foreach (var c in categories)
+                    {
+                        if (selectedCategoryId == c.categoryId)
+                        {
+                            <option value="@c.categoryId" selected="selected">@c.categoryName</option>
+                        }
+                        else
+                        {
+                            <option value="@c.categoryId">@c.categoryName</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="col-12 col-md-3 d-flex gap-2">
+                <button type="submit" class="btn btn-dark w-100 fw-semibold"><i class="bi bi-funnel me-1"></i> Lọc</button>
+                <a asp-area="Admin" asp-controller="Product" asp-action="Product" class="btn btn-outline-secondary"><i class="bi bi-arrow-counterclockwise"></i></a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- PRODUCT TABLE -->
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th class="ps-3">Mã SP</th>
+                        <th>Hình Ảnh</th>
+                        <th>Tên Sản Phẩm</th>
+                        <th>Danh Mục</th>
+                        <th>Giá Bán</th>
+                        <th>Biến Thể Size</th>
+                        <th>Ngày Tạo</th>
+                        <th class="text-end pe-3">Thao Tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="8" class="text-center py-4 text-muted">Không tìm thấy sản phẩm nào phù hợp.</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        foreach (var p in Model)
+                        {
+                            <tr>
+                                <td class="ps-3 fw-bold text-secondary">#SP-@p.productId</td>
+                                <td>
+                                    @{
+                                        string adminImg = p.imageUrl ?? "";
+                                        if (!string.IsNullOrEmpty(adminImg) && !adminImg.StartsWith("http") && !adminImg.StartsWith("/client"))
+                                        {
+                                            adminImg = "/client" + (adminImg.StartsWith("/") ? "" : "/") + adminImg;
+                                        }
+                                        if (string.IsNullOrEmpty(adminImg))
+                                        {
+                                            adminImg = "/client/images/products/adidas-brand.webp";
+                                        }
+                                    }
+                                    <img src="@adminImg" alt="@p.productName" class="rounded border" style="width: 50px; height: 50px; object-fit: cover;" onerror="this.src='https://via.placeholder.com/50?text=Shoe'" />
+                                </td>
+                                <td>
+                                    <div class="fw-bold text-dark">@p.productName</div>
+                                    <small class="text-muted text-truncate d-block" style="max-width: 200px;">@p.description</small>
+                                </td>
+                                <td>
+                                    <span class="badge bg-info-subtle text-dark border border-info-subtle px-2 py-1">
+                                        @(p.Category?.categoryName ?? "Chưa rõ")
+                                    </span>
+                                </td>
+                                <td class="fw-bold text-danger">@p.price.ToString("N0") đ</td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-secondary" onclick="openVariantsModal(@p.productId, '@p.productName', '@JavaScriptEncoder.Default.Encode(System.Text.Json.JsonSerializer.Serialize(p.ProductVariants.Select(v => new { v.id, v.size, v.soleType, v.quantity })))')">
+                                        <i class="bi bi-layers me-1"></i> @p.ProductVariants.Count() size
+                                    </button>
+                                </td>
+                                <td><small class="text-muted">@p.createdAt.ToString("dd/MM/yyyy")</small></td>
+                                <td class="text-end pe-3">
+                                    <div class="btn-group btn-group-sm">
+                                        <button class="btn btn-outline-primary"
+                                                onclick="openEditProductModal(@p.productId, '@p.productName', '@JavaScriptEncoder.Default.Encode(p.description)', @p.price, @p.categoryId, '@p.imageUrl')"
+                                                title="Sửa sản phẩm">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </button>
+                                        <form asp-area="Admin" asp-controller="Product" asp-action="Delete" asp-route-id="@p.productId" method="post" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này? Tất cả biến thể sẽ bị xóa!');">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-outline-danger" title="Xóa">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL THÊM SẢN PHẨM -->
+<div class="modal fade" id="addProductModal" tabindex="-1" aria-labelledby="addProductModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form asp-area="Admin" asp-controller="Product" asp-action="Create" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title fw-bold" id="addProductModalLabel"><i class="bi bi-box-seam me-2"></i>Thêm Sản Phẩm Mới</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Tên Sản Phẩm <span class="text-danger">*</span></label>
+                        <input type="text" name="productName" class="form-control" placeholder="VD: Nike Mercurial Superfly 9" required />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Danh Mục <span class="text-danger">*</span></label>
+                        <select name="categoryId" class="form-select" required>
+                            <option value="">-- Chọn Danh Mục --</option>
+                            @foreach (var c in categories)
+                            {
+                                <option value="@c.categoryId">@c.categoryName</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Giá Bán (VNĐ) <span class="text-danger">*</span></label>
+                        <input type="number" name="price" class="form-control" min="0" step="1000" placeholder="VD: 2500000" required />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Đường dẫn Hình ảnh (URL)</label>
+                        <input type="text" name="imageUrl" class="form-control" placeholder="VD: /images/nike-mercurial.jpg" />
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Mô Tả Sản Phẩm <span class="text-danger">*</span></label>
+                        <textarea name="description" class="form-control" rows="4" placeholder="Nhập mô tả chi tiết chất liệu, công nghệ đế, form chân..." required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-danger fw-semibold"><i class="bi bi-save me-1"></i> Lưu Sản Phẩm</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL SỬA SẢN PHẨM -->
+<div class="modal fade" id="editProductModal" tabindex="-1" aria-labelledby="editProductModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form asp-area="Admin" asp-controller="Product" asp-action="Edit" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" id="editProductId" name="productId" />
+                <div class="modal-header bg-dark text-white">
+                    <h5 class="modal-title fw-bold" id="editProductModalLabel"><i class="bi bi-pencil-square me-2"></i>Chỉnh Sửa Sản Phẩm</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Tên Sản Phẩm <span class="text-danger">*</span></label>
+                        <input type="text" id="editProductName" name="productName" class="form-control" required />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Danh Mục <span class="text-danger">*</span></label>
+                        <select id="editCategoryId" name="categoryId" class="form-select" required>
+                            @foreach (var c in categories)
+                            {
+                                <option value="@c.categoryId">@c.categoryName</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Giá Bán (VNĐ) <span class="text-danger">*</span></label>
+                        <input type="number" id="editPrice" name="price" class="form-control" min="0" step="1000" required />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Đường dẫn Hình ảnh (URL)</label>
+                        <input type="text" id="editImageUrl" name="imageUrl" class="form-control" />
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Mô Tả Sản Phẩm <span class="text-danger">*</span></label>
+                        <textarea id="editDescription" name="description" class="form-control" rows="4" required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary fw-semibold"><i class="bi bi-check-circle me-1"></i> Cập Nhật</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL QUẢN LÝ BIẾN THỂ -->
+<div class="modal fade" id="variantsModal" tabindex="-1" aria-labelledby="variantsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-secondary text-white">
+                <h5 class="modal-title fw-bold" id="variantsModalTitle"><i class="bi bi-layers-fill me-2"></i>Quản Lý Biến Thể Size</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- FORM THÊM BIẾN THỂ MỚI -->
+                <form asp-area="Admin" asp-controller="Product" asp-action="AddVariant" method="post" class="card card-body bg-light mb-3">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="variantProductId" name="productId" />
+                    <h6 class="fw-bold mb-2 text-danger"><i class="bi bi-plus-circle me-1"></i> Thêm Size / Đinh Mới</h6>
+                    <div class="row g-2">
+                        <div class="col-md-3">
+                            <label class="form-label small fw-semibold">Size Giày</label>
+                            <input type="number" name="size" class="form-control form-control-sm" placeholder="VD: 40" required min="30" max="50" />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-semibold">Loại Đinh (Sole)</label>
+                            <select name="soleType" class="form-select form-control-sm" required>
+                                <option value="TF">TF (Đinh dăm sân nhân tạo)</option>
+                                <option value="FG">FG (Đinh cao sân tự nhiên)</option>
+                                <option value="IC">IC (Sân trong nhà)</option>
+                                <option value="AG">AG (Sân cỏ nhân tạo cao)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small fw-semibold">Số Lượng Tồn</label>
+                            <input type="number" name="quantity" class="form-control form-control-sm" value="10" min="0" required />
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button type="submit" class="btn btn-sm btn-danger w-100 fw-semibold">Thêm</button>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- DANH SÁCH BIẾN THỂ ĐÃ CÓ -->
+                <h6 class="fw-bold mb-2">Biến thể hiện có:</h6>
+                <div id="variantsListContainer">
+                    <p class="text-muted small">Đang tải danh sách...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function openEditProductModal(id, name, desc, price, catId, imageUrl) {
+            document.getElementById('editProductId').value = id;
+            document.getElementById('editProductName').value = name;
+            document.getElementById('editDescription').value = desc;
+            document.getElementById('editPrice').value = price;
+            document.getElementById('editCategoryId').value = catId;
+            document.getElementById('editImageUrl').value = imageUrl || '';
+
+            var modal = new bootstrap.Modal(document.getElementById('editProductModal'));
+            modal.show();
+        }
+
+        function openVariantsModal(productId, productName, variantsJson) {
+            document.getElementById('variantProductId').value = productId;
+            document.getElementById('variantsModalTitle').innerHTML = '<i class="bi bi-layers-fill me-2"></i>Biến thể: ' + productName;
+
+            var container = document.getElementById('variantsListContainer');
+            try {
+                var variants = JSON.parse(variantsJson);
+                if (!variants || variants.length === 0) {
+                    container.innerHTML = '<div class="alert alert-info py-2 small mb-0">Chưa có biến thể size nào cho sản phẩm này. Hãy thêm ở form trên!</div>';
+                } else {
+                    var html = '<table class="table table-sm table-bordered align-middle mb-0"><thead><tr class="table-light"><th>ID</th><th>Size</th><th>Loại Đinh</th><th>Số Lượng Tồn</th></tr></thead><tbody>';
+                    variants.forEach(function (v) {
+                        html += '<tr><td>#' + v.id + '</td><td><span class="badge bg-primary fs-6">Size ' + v.size + '</span></td><td>' + v.soleType + '</td><td>' + v.quantity + ' đôi</td></tr>';
+                    });
+                    html += '</tbody></table>';
+                    container.innerHTML = html;
+                }
+            } catch (e) {
+                container.innerHTML = '<p class="text-muted small">Chưa có biến thể nào.</p>';
+            }
+
+            var modal = new bootstrap.Modal(document.getElementById('variantsModal'));
+            modal.show();
+        }
+    </script>
+}

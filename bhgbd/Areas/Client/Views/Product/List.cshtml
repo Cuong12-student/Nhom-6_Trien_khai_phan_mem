@@ -1,0 +1,174 @@
+﻿@model IEnumerable<bhgbd.Models.ProductViewModel>
+@{
+    ViewData["Title"] = "Danh sách sản phẩm";
+    Layout = "~/Areas/Client/Views/Shared/_Layout.cshtml";
+
+    var initialSole = (ViewBag.Sole as string ?? Context.Request.Query["sole"].ToString() ?? "").Trim().ToUpper();
+    var initialBrand = (ViewBag.Brand as string ?? Context.Request.Query["brand"].ToString() ?? "").Trim();
+    var initialSearch = (ViewBag.Search as string ?? Context.Request.Query["search"].ToString() ?? "").Trim();
+    var initialPrice = (Context.Request.Query["price"].ToString() ?? "").Trim();
+    var initialSort = (Context.Request.Query["sort"].ToString() ?? "").Trim();
+
+    var catalogTitle = initialSole switch
+    {
+        "TF" => "GIÀY TF",
+        "FG" => "GIÀY FG",
+        "IC" => "GIÀY IC / FUTSAL",
+        "AG" => "GIÀY AG",
+        _ => "GIÀY BÓNG ĐÁ"
+    };
+    var catalogDescription = initialSole switch
+    {
+        "TF" => "Thiết kế cho sân cỏ nhân tạo với độ bám linh hoạt và phân bổ đinh ổn định.",
+        "FG" => "Thiết kế cho sân cỏ tự nhiên, ưu tiên tốc độ, lực bám và khả năng bứt phá.",
+        "IC" => "Đế phẳng dành cho sân trong nhà và futsal, hỗ trợ kiểm soát bóng ở không gian hẹp.",
+        "AG" => "Cấu trúc đinh dành cho mặt sân cỏ nhân tạo chuẩn, cân bằng giữa độ bám và khả năng xoay trở.",
+        _ => "Chọn theo mặt sân, thương hiệu, khoảng giá và size phù hợp."
+    };
+    var returnUrl = Context.Request.Path + Context.Request.QueryString;
+}
+
+<section class="catalog-hero">
+    <div class="page-shell catalog-hero__inner">
+        <div>
+            <span class="eyebrow">FOOTBALL BOOTS / COLLECTION 2026</span>
+            <h1>@catalogTitle</h1>
+            <p>@catalogDescription</p>
+        </div>
+        <div class="catalog-hero__stats">
+            <strong>@(Model?.Count() ?? 0)</strong><span>SẢN PHẨM</span>
+        </div>
+    </div>
+</section>
+
+<!-- Bỏ thuộc tính data-catalog để tránh bị file client.js xóa nhầm HTML -->
+<form method="get" action="@Url.Action("List", "Product", new { area = "Client" })" class="catalog-page page-shell">
+    <div class="catalog-toolbar">
+        <button class="filter-mobile-button" type="button">BỘ LỌC <span>＋</span></button>
+        <label class="catalog-search">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg>
+            <input type="search" name="search" value="@initialSearch" placeholder="Tìm trong danh sách..." onchange="this.form.submit()" />
+        </label>
+        <div class="catalog-toolbar__right">
+            <span>@(Model?.Count() ?? 0) sản phẩm</span>
+            <label>
+                SẮP XẾP
+                <select name="sort" onchange="this.form.submit()">
+                    <option value="default" selected="@(initialSort == "default" || string.IsNullOrEmpty(initialSort))">Phù hợp nhất</option>
+                    <option value="price-asc" selected="@(initialSort == "price-asc")">Giá tăng dần</option>
+                    <option value="price-desc" selected="@(initialSort == "price-desc")">Giá giảm dần</option>
+                    <option value="new" selected="@(initialSort == "new")">Mới nhất</option>
+                </select>
+            </label>
+        </div>
+    </div>
+
+    <div class="catalog-layout">
+        <aside class="filter-panel">
+            <div class="filter-panel__head">
+                <strong>BỘ LỌC SẢN PHẨM</strong>
+                <button type="button" data-filter-close>×</button>
+            </div>
+
+            <!-- Lọc Loại đinh -->
+            <div class="filter-group">
+                <button type="button" data-filter-heading>LOẠI ĐINH / MẶT SÂN <span>−</span></button>
+                <div class="filter-options">
+                    <label><input type="radio" name="sole" value="" checked="@string.IsNullOrEmpty(initialSole)" onchange="this.form.submit()" /> <span>Tất cả mặt sân</span></label>
+                    <label><input type="radio" name="sole" value="TF" checked="@(initialSole == "TF")" onchange="this.form.submit()" /> <span>TF · Cỏ nhân tạo</span></label>
+                    <label><input type="radio" name="sole" value="FG" checked="@(initialSole == "FG")" onchange="this.form.submit()" /> <span>FG · Cỏ tự nhiên</span></label>
+                    <label><input type="radio" name="sole" value="IC" checked="@(initialSole == "IC")" onchange="this.form.submit()" /> <span>IC · Futsal</span></label>
+                    <label><input type="radio" name="sole" value="AG" checked="@(initialSole == "AG")" onchange="this.form.submit()" /> <span>AG · Cỏ nhân tạo chuẩn</span></label>
+                </div>
+            </div>
+
+            <!-- Lọc Thương hiệu -->
+            <div class="filter-group">
+                <button type="button" data-filter-heading>THƯƠNG HIỆU <span>−</span></button>
+                <div class="filter-options">
+                    <label><input type="radio" name="brand" value="" checked="@string.IsNullOrEmpty(initialBrand)" onchange="this.form.submit()" /> <span>Tất cả thương hiệu</span></label>
+                    <label><input type="radio" name="brand" value="Nike" checked="@(initialBrand.Equals("Nike", StringComparison.OrdinalIgnoreCase))" onchange="this.form.submit()" /> <span>Nike</span></label>
+                    <label><input type="radio" name="brand" value="Adidas" checked="@(initialBrand.Equals("Adidas", StringComparison.OrdinalIgnoreCase))" onchange="this.form.submit()" /> <span>Adidas</span></label>
+                    <label><input type="radio" name="brand" value="Puma" checked="@(initialBrand.Equals("Puma", StringComparison.OrdinalIgnoreCase))" onchange="this.form.submit()" /> <span>Puma</span></label>
+                    <label><input type="radio" name="brand" value="Mizuno" checked="@(initialBrand.Equals("Mizuno", StringComparison.OrdinalIgnoreCase))" onchange="this.form.submit()" /> <span>Mizuno</span></label>
+                    <label><input type="radio" name="brand" value="Asics" checked="@(initialBrand.Equals("Asics", StringComparison.OrdinalIgnoreCase))" onchange="this.form.submit()" /> <span>Asics</span></label>
+                </div>
+            </div>
+
+            <!-- Lọc Mức giá -->
+            <div class="filter-group">
+                <button type="button" data-filter-heading>KHOẢNG GIÁ <span>−</span></button>
+                <div class="filter-options">
+                    <label><input type="radio" name="price" value="all" checked="@(string.IsNullOrEmpty(initialPrice) || initialPrice == "all")" onchange="this.form.submit()" /> <span>Tất cả mức giá</span></label>
+                    <label><input type="radio" name="price" value="under-2" checked="@(initialPrice == "under-2")" onchange="this.form.submit()" /> <span>Dưới 2.000.000đ</span></label>
+                    <label><input type="radio" name="price" value="2-3" checked="@(initialPrice == "2-3")" onchange="this.form.submit()" /> <span>2.000.000đ - 3.000.000đ</span></label>
+                    <label><input type="radio" name="price" value="over-3" checked="@(initialPrice == "over-3")" onchange="this.form.submit()" /> <span>Trên 3.000.000đ</span></label>
+                </div>
+            </div>
+
+            <button class="button button--dark filter-apply" type="submit">ÁP DỤNG BỘ LỌC</button>
+        </aside>
+
+        <!-- Danh sách sản phẩm -->
+        <section class="catalog-products">
+            @if (Model == null || !Model.Any())
+            {
+                <div class="catalog-empty" style="display: block;">
+                    <strong>KHÔNG TÌM THẤY SẢN PHẨM</strong>
+                    <p>Hãy thử bỏ bớt bộ lọc hoặc nhập từ khóa khác.</p>
+                </div>
+            }
+            else
+            {
+                <div class="product-grid">
+                    @foreach (var product in Model)
+                    {
+                        string listImg = product.Image ?? "";
+                        if (!string.IsNullOrEmpty(listImg) && !listImg.StartsWith("http") && !listImg.StartsWith("/client"))
+                        {
+                            listImg = "/client" + (listImg.StartsWith("/") ? "" : "/") + listImg;
+                        }
+                        if (string.IsNullOrEmpty(listImg))
+                        {
+                            listImg = "/client/images/products/adidas-brand.webp";
+                        }
+
+                        <article class="product-card">
+                            <button class="product-heart" type="button" aria-label="Yêu thích">♡</button>
+                            <a class="product-card__media" href="@Url.Action("Detail", "Product", new { area = "Client", id = product.Id, returnUrl })">
+                                @if (!string.IsNullOrWhiteSpace(product.Badge))
+                                {
+                                    <span class="product-tag">@product.Badge</span>
+                                }
+                                <img src="@listImg" alt="@product.Name" />
+                                <span class="product-view">XEM CHI TIẾT →</span>
+                            </a>
+                            <div class="product-card__body">
+                                <span class="product-brand">@(product.Brand?.ToUpper() ?? "BHGBD") · @product.Sole</span>
+                                <a href="@Url.Action("Detail", "Product", new { area = "Client", id = product.Id, returnUrl })">@product.Name</a>
+                                <div>
+                                    <strong>@product.Price</strong>
+                                    @if (!string.IsNullOrWhiteSpace(product.Old))
+                                    {
+                                        <del>@product.Old</del>
+                                    }
+                                </div>
+                                <small>Size: @(string.IsNullOrEmpty(product.Sizes) ? "Free Size" : product.Sizes.Replace(" ", " · "))</small>
+
+                                <a class="product-card__cart" href="@Url.Action("Detail", "Product", new { area = "Client", id = product.Id })">CHỌN SIZE & MUA</a>
+                            </div>
+                        </article>
+                    }
+                </div>
+            }
+
+            <nav class="pagination" aria-label="Phân trang">
+                <button type="button" disabled>←</button>
+                <button class="active" type="button">1</button>
+                <button type="button">2</button>
+                <button type="button">→</button>
+            </nav>
+        </section>
+    </div>
+</form>
+<div class="filter-overlay" data-filter-close></div>

@@ -1,0 +1,102 @@
+﻿@model bhgbd.Models.CartViewModel
+@{
+    ViewData["Title"] = "Giỏ hàng";
+    Layout = "~/Areas/Client/Views/Shared/_Layout.cshtml";
+    var itemCount = Model?.Items?.Count ?? 0;
+}
+
+<section class="cart-heading page-shell">
+    <div>
+        <span class="eyebrow">YOUR BAG / @itemCount ITEMS</span>
+        <h1>GIỎ HÀNG</h1>
+    </div>
+    <a href="@Url.Action("List", "Product", new { area = "Client" })">← TIẾP TỤC MUA SẮM</a>
+</section>
+
+<div class="cart-page page-shell">
+    <section class="cart-items">
+        <div class="cart-table-head">
+            <span>SẢN PHẨM</span>
+            <span>SỐ LƯỢNG</span>
+            <span>THÀNH TIỀN</span>
+        </div>
+
+        @if (Model?.Items == null || !Model.Items.Any())
+        {
+            <div class="cart-empty" style="display: block; text-align: center; padding: 40px 0;">
+                <span class="eyebrow">YOUR BAG IS EMPTY</span>
+                <strong style="display: block; font-size: 20px; margin: 10px 0;">GIỎ HÀNG ĐANG TRỐNG</strong>
+                <p style="color: #666; margin-bottom: 20px;">Hãy quay lại danh sách và chọn đôi giày phù hợp.</p>
+                <a class="button button--dark" href="@Url.Action("List", "Product", new { area = "Client" })">KHÁM PHÁ SẢN PHẨM →</a>
+            </div>
+        }
+        else
+        {
+            @foreach (var item in Model.Items)
+            {
+                // Xử lý đường dẫn ảnh an toàn
+                string itemImg = item.Image ?? "";
+                if (!string.IsNullOrEmpty(itemImg) && !itemImg.StartsWith("http") && !itemImg.StartsWith("/client"))
+                {
+                    itemImg = "/client" + (itemImg.StartsWith("/") ? "" : "/") + itemImg;
+                }
+                if (string.IsNullOrEmpty(itemImg))
+                {
+                    itemImg = "/client/images/products/default.webp";
+                }
+
+                <article class="cart-item">
+                    <a class="cart-item__image" href="@Url.Action("Detail", "Product", new { area = "Client", id = item.ProductId })">
+                        <img src="@itemImg" alt="@item.ProductName" />
+                    </a>
+
+                    <div class="cart-item__info">
+                        <span>@(item.Brand?.ToUpper()) · @item.Sole</span>
+                        <a href="@Url.Action("Detail", "Product", new { area = "Client", id = item.ProductId })">@item.ProductName</a>
+                        <p>Size @item.Size · Đế @item.Sole</p>
+
+                        <!-- Form Xóa item -->
+                        <form action="@Url.Action("RemoveItem", "Cart", new { area = "Client" })" method="post" style="margin-top: 8px;">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="cartItemId" value="@item.CartItemId" />
+                            <button type="submit" style="background:none; border:none; color:#e00; cursor:pointer; padding:0; font-size:12px; font-weight:bold;">✕ XÓA SẢN PHẨM</button>
+                        </form>
+                    </div>
+
+                    <!-- Form Cập nhật số lượng -->
+                    <div class="cart-item__quantity">
+                        <form action="@Url.Action("UpdateQuantity", "Cart", new { area = "Client" })" method="post" style="display: flex; align-items: center; gap: 4px;">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="cartItemId" value="@item.CartItemId" />
+
+                            <button type="button" onclick="var inp=this.parentElement.querySelector('input[type=number]'); if(parseInt(inp.value)>1){ inp.value=parseInt(inp.value)-1; this.form.submit(); }" style="width:28px; height:28px; border:1px solid #ccc; background:#fff; cursor:pointer; font-weight:bold;">-</button>
+
+                            <input type="number" name="quantity" value="@item.Quantity" min="1" max="9" onchange="this.form.submit()" style="width: 40px; height:28px; text-align: center; border:1px solid #ccc; font-weight:bold;" readonly />
+
+                            <button type="button" onclick="var inp=this.parentElement.querySelector('input[type=number]'); if(parseInt(inp.value)<9){ inp.value=parseInt(inp.value)+1; this.form.submit(); }" style="width:28px; height:28px; border:1px solid #ccc; background:#fff; cursor:pointer; font-weight:bold;">+</button>
+                        </form>
+                    </div>
+
+                    <strong class="cart-item__total">@item.TotalPriceFormatted</strong>
+                </article>
+            }
+        }
+    </section>
+
+    <!-- Tóm tắt hóa đơn -->
+    <aside class="cart-summary">
+        <span class="eyebrow">ORDER / SUMMARY</span>
+        <h2>TÓM TẮT ĐƠN HÀNG</h2>
+        <div class="summary-row"><span>Tạm tính</span><strong>@Model?.SubTotalFormatted</strong></div>
+        <div class="summary-row"><span>Phí vận chuyển</span><strong>Miễn phí</strong></div>
+        <div class="summary-total" style="margin-top: 20px; padding-top: 15px; border-top: 2px solid #000;">
+            <span>TỔNG THANH TOÁN</span>
+            <strong style="font-size: 20px;">@Model?.GrandTotalFormatted</strong>
+        </div>
+
+        @if (Model?.Items != null && Model.Items.Any())
+        {
+            <a class="button button--accent button--full" href="@Url.Action("Checkout", "Order", new { area = "Client" })" style="display: block; width: 100%; text-align: center; margin-top: 15px; padding: 14px 0; background: #000; color: #fff; font-weight: bold; text-decoration: none; border-radius: 4px;">TIẾN HÀNH THANH TOÁN →</a>
+        }
+    </aside>
+</div>

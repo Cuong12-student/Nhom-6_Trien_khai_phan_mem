@@ -1,0 +1,145 @@
+﻿@model bhgbd.Models.CheckoutViewModel
+@{
+    ViewData["Title"] = "Thanh toán";
+    Layout = "~/Areas/Client/Views/Shared/_Layout.cshtml";
+}
+
+<section class="checkout-heading page-shell">
+    <div>
+        <span class="eyebrow">SECURE / CHECKOUT</span>
+        <h1>THANH TOÁN</h1>
+    </div>
+    <div class="checkout-steps">
+        <span class="done">01 GIỎ HÀNG</span><i></i>
+        <span class="active">02 THÔNG TIN</span><i></i>
+        <span>03 HOÀN TẤT</span>
+    </div>
+</section>
+
+<!-- Hiển thị thông báo lỗi nếu có từ Controller -->
+@if (TempData["Error"] != null)
+{
+    <div class="page-shell mt-3">
+        <div class="alert alert-danger" style="background-color: #f8d7da; color: #721c24; padding: 12px 20px; border-radius: 6px; border: 1px solid #f5c6cb;">
+            ⚠️ <strong>Thanh toán thất bại:</strong> @TempData["Error"]
+        </div>
+    </div>
+}
+
+<form action="@Url.Action("CreateOrder", "Order", new { area = "Client" })" method="post" class="checkout-page page-shell">
+    @Html.AntiForgeryToken()
+
+    <section class="checkout-form-panel">
+        <div class="checkout-block">
+            <div class="checkout-block__head">
+                <span>01</span>
+                <div>
+                    <strong>THÔNG TIN GIAO HÀNG</strong>
+                    <p>Nhập chính xác thông tin người nhận.</p>
+                </div>
+            </div>
+            <div class="form-grid">
+                <label class="form-field">
+                    <span>HỌ TÊN NGƯỜI NHẬN *</span>
+                    <input type="text" name="ReceiverName" value="@Model?.ReceiverName" required placeholder="Nguyễn Văn A" />
+                </label>
+
+                <label class="form-field">
+                    <span>SỐ ĐIỆN THOẠI *</span>
+                    <input type="tel" name="ReceiverPhone" value="@Model?.ReceiverPhone" required placeholder="0912345678" />
+                </label>
+
+                <label class="form-field form-field--full">
+                    <span>ĐỊA CHỈ NHẬN HÀNG *</span>
+                    <input type="text" name="ReceiverAddress" value="@Model?.ReceiverAddress" placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành phố" required />
+                </label>
+
+                <label class="form-field form-field--full">
+                    <span>GHI CHÚ ĐƠN HÀNG</span>
+                    <!-- Đổi name="Note" thành name="Notes" cho khớp ViewModel -->
+                    <textarea name="Notes" rows="4" placeholder="Thời gian nhận hàng, yêu cầu hỗ trợ kiểm tra size...">@Model?.Note</textarea>
+                </label>
+            </div>
+        </div>
+
+        <div class="checkout-block">
+            <div class="checkout-block__head">
+                <span>02</span>
+                <div>
+                    <strong>PHƯƠNG THỨC THANH TOÁN</strong>
+                    <p>Chọn một phương thức phù hợp.</p>
+                </div>
+            </div>
+            <div class="payment-options">
+                <label class="payment-card active">
+                    <input type="radio" name="PaymentMethod" value="COD" checked />
+                    <span class="payment-radio"></span><span class="payment-icon">₫</span>
+                    <span>
+                        <strong>THANH TOÁN KHI NHẬN HÀNG</strong>
+                        <small>Kiểm tra đơn và thanh toán trực tiếp cho đơn vị giao hàng.</small>
+                    </span>
+                </label>
+
+                <label class="payment-card">
+                    <input type="radio" name="PaymentMethod" value="BANK" />
+                    <span class="payment-radio"></span><span class="payment-icon">▤</span>
+                    <span>
+                        <strong>CHUYỂN KHOẢN NGÂN HÀNG</strong>
+                        <small>Thông tin chuyển khoản được cung cấp sau khi xác nhận đơn.</small>
+                    </span>
+                </label>
+            </div>
+        </div>
+
+        <label class="checkout-agreement">
+            <input type="checkbox" required />
+            <span>Tôi đã kiểm tra size, loại đế, thông tin giao hàng và đồng ý với chính sách đặt hàng.</span>
+        </label>
+
+        <button class="button button--accent button--checkout" type="submit">XÁC NHẬN ĐẶT HÀNG →</button>
+    </section>
+
+    <!-- Cột danh sách sản phẩm thanh toán -->
+    <aside class="checkout-summary">
+        <span class="eyebrow">YOUR / ORDER</span>
+        <h2>ĐƠN HÀNG CỦA BẠN</h2>
+
+        @if (Model?.CartItems != null && Model.CartItems.Any())
+        {
+            @foreach (var item in Model.CartItems)
+            {
+                string itemImg = item.Image ?? "";
+                if (!string.IsNullOrEmpty(itemImg) && !itemImg.StartsWith("http") && !itemImg.StartsWith("/client"))
+                {
+                    itemImg = "/client" + (itemImg.StartsWith("/") ? "" : "/") + itemImg;
+                }
+                if (string.IsNullOrEmpty(itemImg))
+                {
+                    itemImg = "/client/images/products/default.webp";
+                }
+
+                <article class="checkout-product">
+                    <div>
+                        <img src="@itemImg" alt="@item.ProductName" />
+                        <b>@item.Quantity</b>
+                    </div>
+                    <p>
+                        <span>@(item.Brand?.ToUpper()) · @item.Sole</span>
+                        <strong>@item.ProductName</strong>
+                        <small>Size @item.Size · Đế @item.Sole</small>
+                    </p>
+                    <em>@item.TotalPriceFormatted</em>
+                </article>
+            }
+        }
+        else
+        {
+            <p class="text-muted">Không tìm thấy thông tin sản phẩm trong đơn.</p>
+        }
+
+        <div class="summary-row"><span>Tạm tính</span><strong>@Model?.SubTotalFormatted</strong></div>
+        <div class="summary-row"><span>Phí vận chuyển</span><strong>Miễn phí</strong></div>
+        <div class="summary-row"><span>Giảm giá</span><strong>@Model?.DiscountFormatted</strong></div>
+        <div class="summary-total"><span>TỔNG CỘNG</span><strong>@Model?.GrandTotalFormatted</strong></div>
+    </aside>
+</form>

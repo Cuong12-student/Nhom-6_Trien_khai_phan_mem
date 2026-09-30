@@ -1,0 +1,156 @@
+﻿@model bhgbd.Models.ProductDetailViewModel
+@{
+    Layout = "~/Areas/Client/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = Model.Name;
+    var returnUrl = ViewBag.ReturnUrl as string ?? Url.Action("List", "Product", new { area = "Client" });
+    var related = ViewBag.RelatedProducts as List<bhgbd.Models.ProductViewModel> ?? new List<bhgbd.Models.ProductViewModel>();
+}
+
+<div class="product-detail-page">
+    <div class="detail-topbar page-shell" style="padding: 15px 0;">
+        <a href="@returnUrl" style="text-decoration:none; color:#000; font-weight:bold; font-size:13px;">← QUAY LẠI DANH SÁCH</a>
+    </div>
+
+    <div class="detail-layout" style="display: flex; gap: 40px; align-items: flex-start;">
+        <!-- Gallery ảnh -->
+        <section class="detail-gallery-ui" style="flex: 1;">
+            <div class="detail-main-image">
+                @{
+                    string firstImg = Model.Images?.FirstOrDefault() ?? "";
+                    if (!string.IsNullOrEmpty(firstImg) && !firstImg.StartsWith("http") && !firstImg.StartsWith("/client"))
+                    {
+                        firstImg = "/client" + (firstImg.StartsWith("/") ? "" : "/") + firstImg;
+                    }
+                    if (string.IsNullOrEmpty(firstImg))
+                    {
+                        firstImg = "/client/images/products/adidas-brand.webp";
+                    }
+                }
+                <img src="@firstImg" alt="@Model.Name" style="width:100%; border-radius:8px;" />
+            </div>
+            @if (Model.Images != null && Model.Images.Count > 1)
+            {
+                <div class="detail-thumbnails" style="display:flex; gap:10px; margin-top:10px;">
+                    @foreach (var img in Model.Images)
+                    {
+                        string thumbImg = img ?? "";
+                        if (!string.IsNullOrEmpty(thumbImg) && !thumbImg.StartsWith("http") && !thumbImg.StartsWith("/client"))
+                        {
+                            thumbImg = "/client" + (thumbImg.StartsWith("/") ? "" : "/") + thumbImg;
+                        }
+                        <button type="button" style="border:1px solid #ddd; background:none; cursor:pointer; padding:2px;"><img src="@thumbImg" alt="@Model.Name" style="width:60px; height:60px; object-fit:cover;" /></button>
+                    }
+                </div>
+            }
+        </section>
+
+        <!-- Form Mua Hàng -->
+        <form action="@Url.Action("AddToCart", "Cart", new { area = "Client" })" method="post" class="detail-buy-panel" style="flex: 1; background: #fff; padding: 20px; border-radius: 8px;">
+            <input type="hidden" name="productId" value="@Model.Id" />
+
+            <div class="detail-breadcrumb" style="font-size:12px; color:#666; text-transform:uppercase;">TRANG CHỦ / GIÀY @Model.Sole / @Model.Brand.ToUpper()</div>
+
+            <h1 style="font-size: 28px; font-weight: 800; margin: 10px 0;">@Model.Name</h1>
+            <p class="detail-summary" style="color:#555; font-size:14px; margin-bottom:15px;">@Model.Summary</p>
+
+            <div class="detail-price" style="font-size: 24px; font-weight: 800; margin-bottom: 20px;">
+                <strong>@Model.Price</strong>
+                @if (!string.IsNullOrWhiteSpace(Model.OldPrice))
+                {
+                    <del style="font-size:16px; color:#888; margin-left:10px;">@Model.OldPrice</del>
+                }
+            </div>
+
+            <!-- Chọn Size -->
+            <div class="purchase-option" style="margin-bottom: 20px;">
+                <div class="purchase-option__head" style="margin-bottom: 8px;"><strong>CHỌN SIZE *</strong></div>
+                <div class="purchase-size-grid" style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    @if (Model.Sizes != null && Model.Sizes.Any())
+                    {
+                        bool isFirst = true;
+                        foreach (var size in Model.Sizes)
+                        {
+                            <label style="cursor: pointer;">
+                                <input type="radio" name="size" value="@size" required @(isFirst ? "checked" : "") style="display:none;" onchange="document.querySelectorAll('.size-btn-box').forEach(b => {b.style.borderColor='#ccc'; b.style.backgroundColor='#fff'; b.style.color='#000';}); var box=this.parentElement.querySelector('.size-btn-box'); box.style.borderColor='#000'; box.style.backgroundColor='#000'; box.style.color='#fff';" />
+                                <span class="size-btn-box" style="display:block; min-width:45px; padding:10px 14px; border:@(isFirst ? "2px solid #000" : "1px solid #ccc"); background-color:@(isFirst ? "#000" : "#fff"); color:@(isFirst ? "#fff" : "#000"); text-align:center; font-weight:bold; border-radius:4px; transition:all 0.2s;">@size</span>
+                            </label>
+                            isFirst = false;
+                        }
+                    }
+                </div>
+            </div>
+
+            <!-- Loại đế -->
+            <div class="purchase-option" style="margin-bottom: 20px;">
+                <div class="purchase-option__head" style="margin-bottom: 8px;"><strong>LOẠI ĐINH / LOẠI ĐẾ</strong></div>
+                <div class="sole-options">
+                    <button class="active" type="button" style="padding: 10px 15px; border: 2px solid #000; background: #f9f9f9; font-weight: bold; cursor: default; border-radius: 4px;">
+                        <b>@Model.Sole</b> - <span>@Model.SoleName</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Số lượng -->
+            <div class="quantity-row" style="margin-bottom: 20px; display: flex; align-items: center; gap: 15px;">
+                <strong>SỐ LƯỢNG:</strong>
+                <div class="quantity-control" style="display: flex; align-items: center; border: 1px solid #ccc; border-radius: 4px; overflow: hidden;">
+                    <button type="button" onclick="var inp=this.parentElement.querySelector('input'); if(parseInt(inp.value)>1) inp.value=parseInt(inp.value)-1;" style="width:36px; height:36px; background:#f5f5f5; border:none; font-weight:bold; cursor:pointer;">-</button>
+                    <input type="number" name="quantity" min="1" max="9" value="1" readonly style="width: 45px; height:36px; text-align: center; font-size:15px; font-weight:bold; border:none;" />
+                    <button type="button" onclick="var inp=this.parentElement.querySelector('input'); if(parseInt(inp.value)<9) inp.value=parseInt(inp.value)+1;" style="width:36px; height:36px; background:#f5f5f5; border:none; font-weight:bold; cursor:pointer;">+</button>
+                </div>
+            </div>
+
+            <!-- NÚT THÊM VÀO GIỎ HÀNG BẢN NỔI BẬT HIỆN ĐẠI -->
+            <div class="detail-actions" style="margin-top: 25px;">
+                <button type="submit" style="width: 100%; padding: 16px 0; background-color: #000; color: #fff; font-size: 15px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; border: none; border-radius: 4px; cursor: pointer; transition: background 0.2s;">
+                    🛒 THÊM VÀO GIỎ HÀNG →
+                </button>
+            </div>
+
+            <div class="detail-benefits" style="margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px;">
+                <article style="margin-bottom: 10px;"><strong>01. CAM KẾT CHÍNH HÃNG</strong> - Thông tin sản phẩm minh bạch.</article>
+                <article><strong>02. HỖ TRỢ ĐỔI SIZE</strong> - Áp dụng theo điều kiện của cửa hàng.</article>
+            </div>
+        </form>
+    </div>
+</div>
+
+<section id="product-description" class="product-description-section page-shell" style="margin-top: 40px; padding-top: 30px; border-top: 1px solid #eee;">
+    <div class="product-description-section__title"><span class="eyebrow" style="color:#888; font-size:12px;">PRODUCT / DETAILS</span><h2>@Model.StoryTitle</h2></div>
+    <div class="product-description-grid" style="display: flex; gap: 30px; margin-top: 20px;">
+        <article style="flex:1;"><h3>THÔNG TIN SẢN PHẨM</h3><p style="color:#555;">@Model.Description</p></article>
+        <article style="flex:1;"><h3>PHÙ HỢP VỚI</h3><p style="color:#555;">@Model.Fit</p></article>
+    </div>
+</section>
+
+<!-- Sản phẩm liên quan -->
+@if (related != null && related.Any())
+{
+    <section class="section section--soft" style="margin-top: 50px; background: #f9f9f9; padding: 40px 0;">
+        <div class="page-shell">
+            <div class="section-heading" style="margin-bottom: 20px;"><h2>SẢN PHẨM LIÊN QUAN</h2></div>
+            <div class="product-grid product-grid--home" style="display: flex; gap: 20px;">
+                @foreach (var item in related)
+                {
+                    <article class="product-card" style="flex: 1; background: #fff; padding: 15px; border-radius: 6px;">
+                        <a class="product-card__media" href="@Url.Action("Detail", "Product", new { area = "Client", id = item.Id })">
+                            @{
+                                string relImg = item.Image ?? "";
+                                if (!string.IsNullOrEmpty(relImg) && !relImg.StartsWith("http") && !relImg.StartsWith("/client"))
+                                {
+                                    relImg = "/client" + (relImg.StartsWith("/") ? "" : "/") + relImg;
+                                }
+                            }
+                            <img src="@relImg" alt="@item.Name" style="width: 100%; border-radius: 4px;" />
+                        </a>
+                        <div class="product-card__body" style="margin-top: 10px;">
+                            <span class="product-brand" style="font-size: 11px; color: #888;">@(item.Brand?.ToUpper()) · @item.Sole</span>
+                            <h4 style="margin: 5px 0;"><a href="@Url.Action("Detail", "Product", new { area = "Client", id = item.Id })" style="text-decoration:none; color:#000;">@item.Name</a></h4>
+                            <div><strong>@item.Price</strong></div>
+                        </div>
+                    </article>
+                }
+            </div>
+        </div>
+    </section>
+}

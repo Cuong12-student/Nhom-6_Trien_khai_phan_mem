@@ -1,0 +1,130 @@
+﻿/* Styles for Staff Workspace Area - BHGBD */
+:root {
+    --staff-primary: #0dcaf0;
+    --staff-dark: #212529;
+    --staff-light: #f8f9fa;
+    --staff-accent: #0d6efd;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f6f9;
+}
+
+.staff-header {
+    background: linear-gradient(135deg, #2b3035 0%, #1a1e21 100%);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+    border-bottom: 3px solid var(--staff-primary);
+}
+
+.staff-nav-link {
+    color: rgba(255, 255, 255, 0.8) !important;
+    font-weight: 500;
+    padding: 0.5rem 1rem !important;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+    .staff-nav-link:hover, .staff-nav-link.active {
+        color: #ffffff !important;
+        background-color: rgba(13, 202, 240, 0.2);
+    }
+
+/* STAT CARDS STAFF */
+.stat-card {
+    border: none;
+    border-radius: 16px;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 16px 30px rgba(15, 23, 42, 0.1);
+    }
+
+.stat-icon {
+    width: 54px;
+    height: 54px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+/* CARD STATUS COLORS (TRẠNG THÁI ĐƠN HÀNG STAFF) */
+.card-pending {
+    background-color: rgba(255, 193, 7, 0.15);
+    color: #d39e00;
+}
+
+.card-confirmed {
+    background-color: rgba(25, 135, 84, 0.1);
+    color: #198754;
+}
+
+.card-cancel-req {
+    background-color: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+}
+
+.card-cancelled {
+    background-color: rgba(108, 117, 125, 0.1);
+    color: #6c757d;
+}
+
+/* PANELS & TABLES STAFF */
+.staff-panel-card {
+    border: 0;
+    border-radius: 16px;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+}
+
+.table-custom {
+    background: #ffffff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+    .table-custom thead {
+        background-color: #212529;
+        color: white;
+    }
+
+/* STATUS BADGES */
+.badge-status {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.badge-pending {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.badge-confirmed {
+    background-color: #d1e7dd;
+    color: #0f5132;
+}
+
+.badge-cancel-req {
+    background-color: #f8d7da;
+    color: #842029;
+}
+
+.badge-cancelled {
+    background-color: #e2e3e5;
+    color: #41464b;
+}
+
+/* FOOTER STAFF */
+.footer-staff {
+    background-color: #ffffff;
+    border-top: 1px solid #dee2e6;
+    color: #6c757d;
+    padding: 1rem 0;
+}

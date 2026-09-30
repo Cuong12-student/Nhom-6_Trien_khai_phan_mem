@@ -1,0 +1,130 @@
+﻿@model IEnumerable<bhgbd.Models.ProductViewModel>
+@{
+    ViewData["Title"] = "Trang chủ";
+    Layout = "~/Areas/Client/Views/Shared/_Layout.cshtml";
+}
+
+<section class="home-hero" data-hero-carousel>
+    <article class="hero-slide active" data-hero-slide>
+        <video autoplay muted loop playsinline poster="/client/images/adidas-hero-poster.webp" data-hero-video>
+            <source src="/client/videos/adidas-hero.mp4" type="video/mp4" />
+        </video>
+        <div class="home-hero__shade"></div>
+        <div class="home-hero__content page-shell">
+            <span class="eyebrow eyebrow--light">FOOTBALL / COLLECTION 2026</span>
+            <h1>CHỌN ĐÔI GIÀY.<br /><em>LÀM CHỦ TRẬN ĐẤU.</em></h1>
+            <p>Từ sân cỏ nhân tạo đến sân cỏ tự nhiên, BHGBD giúp bạn tìm đôi giày phù hợp với mặt sân, vị trí thi đấu và phong cách chơi.</p>
+            <div class="hero-buttons">
+                <a class="button button--accent" href="@Url.Action("List", "Product", new { area = "Client" })">MUA NGAY →</a>
+                <a class="button button--glass" href="#featured-categories">KHÁM PHÁ DANH MỤC</a>
+            </div>
+        </div>
+        <div class="hero-meta"><b>BUILT FOR THE MATCH</b><span>TF / FG / IC / AG</span></div>
+        <button class="sound-button" type="button" data-sound-toggle aria-label="Bật âm thanh"><span>⌁</span><b>BẬT ÂM</b></button>
+    </article>
+    <article class="hero-slide hero-slide--image" data-hero-slide>
+        <img src="/client/images/black-orange.webp" alt="Bộ sưu tập giày bóng đá tốc độ" />
+        <div class="home-hero__shade home-hero__shade--second"></div>
+        <div class="home-hero__content page-shell">
+            <span class="eyebrow eyebrow--light">PREDATOR / MATCH CONTROL</span>
+            <h1>ĐÚNG MẶT SÂN.<br /><em>ĐÚNG LỢI THẾ.</em></h1>
+            <p>TF cho sân cỏ nhân tạo, FG cho sân cỏ tự nhiên và IC cho futsal. Chọn đúng loại đế để tự tin trong từng pha xử lý.</p>
+            <div class="hero-buttons"><a class="button button--accent" href="@Url.Action("List", "Product", new { area = "Client", sole = "TF" })">XEM GIÀY TF →</a><a class="button button--glass" href="@Url.Action("List", "Product", new { area = "Client", sole = "FG" })">XEM GIÀY FG</a></div>
+        </div>
+    </article>
+    <div class="hero-carousel-nav"><button class="active" type="button" data-hero-dot="0" aria-label="Banner 1"></button><button type="button" data-hero-dot="1" aria-label="Banner 2"></button></div>
+    <div class="hero-ticker"><span>TOUCH</span><i>◆</i><span>SPEED</span><i>◆</i><span>CONTROL</span><i>◆</i><span>POWER</span><i>◆</i><span>CONFIDENCE</span></div>
+</section>
+
+<section id="featured-categories" class="section page-shell">
+    <div class="section-heading">
+        <div><span class="eyebrow">CHỌN THEO MẶT SÂN</span><h2>DANH MỤC NỔI BẬT</h2></div>
+        <a href="@Url.Action("List", "Product", new { area = "Client" })">XEM TẤT CẢ →</a>
+    </div>
+    <div class="category-showcase">
+        <a class="category-tile category-tile--large" href="@Url.Action("List", "Product", new { area = "Client", sole = "TF" })">
+            <img src="/client/images/black-orange.webp" alt="Giày cỏ nhân tạo TF" />
+            <span>01 / SÂN CỎ NHÂN TẠO</span><strong>GIÀY TF</strong><b>ĐỘ BÁM LINH HOẠT →</b>
+        </a>
+        <a class="category-tile" href="@Url.Action("List", "Product", new { area = "Client", sole = "FG" })">
+            <img src="/client/images/navy-side.webp" alt="Giày cỏ tự nhiên FG" />
+            <span>02 / SÂN CỎ TỰ NHIÊN</span><strong>GIÀY FG</strong><b>TỐC ĐỘ & BỨT PHÁ →</b>
+        </a>
+        <a class="category-tile" href="@Url.Action("List", "Product", new { area = "Client", sole = "IC" })">
+            <img src="/client/images/white-mint.webp" alt="Giày futsal IC" />
+            <span>03 / SÂN TRONG NHÀ</span><strong>GIÀY IC</strong><b>KIỂM SOÁT GỌN GÀNG →</b>
+        </a>
+        <a class="category-tile category-tile--wide" href="@Url.Action("List", "Product", new { area = "Client", category = "accessory" })">
+            <img src="/client/images/multi-running.webp" alt="Phụ kiện bóng đá" />
+            <span>04 / MATCH ESSENTIALS</span><strong>PHỤ KIỆN</strong><b>TẤT, BÓ GỐI, BALO & BÓNG →</b>
+        </a>
+    </div>
+</section>
+
+<!-- PHẦN THAY ĐỔI: SẢN PHẨM BÁN CHẠY LOAD ĐỘNG TỪ MODEL -->
+<section class="section section--soft" id="best-sellers">
+    <div class="page-shell">
+        <div class="section-heading">
+            <div><span class="eyebrow">PLAYER'S CHOICE</span><h2>SẢN PHẨM BÁN CHẠY</h2></div>
+            <a href="@Url.Action("List", "Product", new { area = "Client", sort = "best" })">XEM TẤT CẢ →</a>
+        </div>
+        <div class="product-grid product-grid--home">
+            @if (Model != null && Model.Any())
+            {
+                @foreach (var product in Model)
+                {
+                    string homeImg = product.Image ?? "";
+                    if (!string.IsNullOrEmpty(homeImg) && !homeImg.StartsWith("http") && !homeImg.StartsWith("/client"))
+                    {
+                        homeImg = "/client" + (homeImg.StartsWith("/") ? "" : "/") + homeImg;
+                    }
+                    if (string.IsNullOrEmpty(homeImg))
+                    {
+                        homeImg = "/client/images/products/adidas-brand.webp";
+                    }
+                    <article class="product-card">
+                        <a class="product-card__media" href="@Url.Action("Detail", "Product", new { area = "Client", id = product.Id })">
+                            @if (!string.IsNullOrWhiteSpace(product.Badge))
+                            {
+                                <span class="product-tag">@product.Badge</span>
+                            }
+                            <img src="@homeImg" alt="@product.Name" />
+                            <span class="product-view">XEM CHI TIẾT →</span>
+                        </a>
+                        <div class="product-card__body">
+                            <span class="product-brand">@product.Brand.ToUpper() · @product.Sole</span>
+                            <a href="@Url.Action("Detail", "Product", new { area = "Client", id = product.Id })">@product.Name</a>
+                            <div>
+                                <strong>@product.Price</strong>
+                                @if (!string.IsNullOrWhiteSpace(product.Old))
+                                {
+                                    <del>@product.Old</del>
+                                }
+                            </div>
+                        </div>
+                    </article>
+                }
+            }
+        </div>
+    </div>
+</section>
+
+<section class="campaign-video">
+    <video autoplay muted loop playsinline poster="/client/images/nike-campaign-poster.webp">
+        <source src="/client/videos/nike-campaign.mp4" type="video/mp4" />
+    </video>
+    <div class="campaign-video__shade"></div>
+    <div class="campaign-video__content page-shell">
+        <span class="eyebrow eyebrow--light">MATCH DAY / BHGBD STORE</span>
+        <h2>PLAY<br />WITHOUT<br /><em>LIMITS.</em></h2>
+        <p>Một đôi giày đúng mặt sân tạo nên cảm giác tự tin trong từng pha chạm bóng.</p>
+        <a class="button button--light" href="@Url.Action("List", "Product", new { area = "Client" })">KHÁM PHÁ NGAY →</a>
+    </div>
+</section>
+
+<section class="commitment-section page-shell">
+    <article><span>01</span><div><strong>CAM KẾT CHÍNH HÃNG</strong><p>Sản phẩm minh bạch nguồn gốc và thông tin biến thể.</p></div></article>
+    <article><span>02</span><div><strong>MIỄN PHÍ VẬN CHUYỂN</strong><p>Áp dụng cho đơn hàng đủ điều kiện của cửa hàng.</p></div></article>
+    <article><span>03</span><div><strong>HỖ TRỢ ĐỔI SIZE</strong><p>Đổi size theo chính sách và tình trạng tồn kho.</p></div></article>
+    <article><span>04</span><div><strong>TƯ VẤN MẶT SÂN</strong><p>Chọn TF, FG hay IC phù hợp nhu cầu thi đấu.</p></div></article>
+</section>

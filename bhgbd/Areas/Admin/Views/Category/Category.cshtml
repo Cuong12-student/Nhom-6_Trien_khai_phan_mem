@@ -1,0 +1,227 @@
+﻿@model IEnumerable<bhgbd.Models.Category>
+@using System.Text.Encodings.Web
+@{
+    ViewData["Title"] = "Quản lý Danh mục";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+    var totalCategories = (int)ViewBag.TotalCategories;
+    var activeCategories = (int)ViewBag.ActiveCategories;
+    var inactiveCategories = (int)ViewBag.InactiveCategories;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold mb-0 text-dark"><i class="bi bi-tags-fill text-danger me-2"></i>Quản Lý Danh Mục Sản Phẩm</h2>
+        <p class="text-muted small mb-0">Quản lý các loại giày bóng đá và phụ kiện để hiển thị đúng cho khách hàng.</p>
+    </div>
+    <button type="button" class="btn btn-danger fw-semibold" data-bs-toggle="modal" data-bs-target="#addCategoryModal">
+        <i class="bi bi-plus-circle me-1"></i> Thêm Danh Mục Mới
+    </button>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-12 col-md-4">
+        <div class="card admin-panel-card h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small text-uppercase">Tổng danh mục</div>
+                        <h3 class="fw-bold mb-0">@totalCategories</h3>
+                    </div>
+                    <div class="stat-icon card-orders"><i class="bi bi-tags"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-4">
+        <div class="card admin-panel-card h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small text-uppercase">Đang hiển thị</div>
+                        <h3 class="fw-bold mb-0 text-success">@activeCategories</h3>
+                    </div>
+                    <div class="stat-icon card-revenue"><i class="bi bi-eye"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-4">
+        <div class="card admin-panel-card h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small text-uppercase">Đã ẩn</div>
+                        <h3 class="fw-bold mb-0 text-secondary">@inactiveCategories</h3>
+                    </div>
+                    <div class="stat-icon card-products"><i class="bi bi-eye-slash"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>@TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th class="ps-3" style="width: 10%;">Mã DM</th>
+                        <th style="width: 25%;">Tên Danh Mục</th>
+                        <th style="width: 35%;">Mô Tả</th>
+                        <th style="width: 15%;">Trạng Thái</th>
+                        <th class="text-end pe-3" style="width: 15%;">Thao Tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center py-4 text-muted">Chưa có danh mục nào. Bấm nút phía trên để thêm mới!</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="ps-3 fw-bold text-secondary">#DM-@item.categoryId</td>
+                                <td class="fw-bold text-dark">@item.categoryName</td>
+                                <td class="text-muted">@item.description</td>
+                                <td>
+                                    @if (item.isActive)
+                                    {
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-2">
+                                            <i class="bi bi-circle-fill me-1 small"></i> Đang bật
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle rounded-pill px-3 py-2">
+                                            <i class="bi bi-eye-slash-fill me-1 small"></i> Đã ẩn
+                                        </span>
+                                    }
+                                </td>
+                                <td class="text-end pe-3">
+                                    <div class="btn-group btn-group-sm">
+                                        <button class="btn btn-outline-primary"
+                                                onclick="openEditModal(@item.categoryId, '@item.categoryName', '@JavaScriptEncoder.Default.Encode(item.description)', @item.isActive.ToString().ToLower())"
+                                                title="Sửa">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </button>
+                                        <form asp-area="Admin" asp-controller="Category" asp-action="ToggleStatus" asp-route-id="@item.categoryId" method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-outline-warning" title="@(item.isActive ? "Ẩn danh mục" : "Hiện danh mục")">
+                                                <i class="bi @(item.isActive ? "bi-eye-slash" : "bi-eye")"></i>
+                                            </button>
+                                        </form>
+                                        <form asp-area="Admin" asp-controller="Category" asp-action="Delete" asp-route-id="@item.categoryId" method="post" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa danh mục này?');">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-outline-danger" title="Xóa">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="addCategoryModal" tabindex="-1" aria-labelledby="addCategoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-area="Admin" asp-controller="Category" asp-action="Create" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-header-title fw-bold modal-title" id="addCategoryModalLabel"><i class="bi bi-folder-plus me-2"></i>Thêm Danh Mục Mới</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Tên Danh Mục <span class="text-danger">*</span></label>
+                        <input type="text" name="categoryName" class="form-control" placeholder="VD: Giày Cỏ Nhân Tạo (TF)" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Mô Tả <span class="text-danger">*</span></label>
+                        <textarea name="description" class="form-control" rows="3" placeholder="Nhập thông tin mô tả danh mục..." required></textarea>
+                    </div>
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" name="isActive" value="true" id="isActiveCreate" checked />
+                        <label class="form-check-label fw-semibold" for="isActiveCreate">Kích hoạt ngay (Bật hiển thị)</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-danger fw-semibold"><i class="bi bi-save me-1"></i> Lưu Danh Mục</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="editCategoryModal" tabindex="-1" aria-labelledby="editCategoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-area="Admin" asp-controller="Category" asp-action="Edit" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" id="editCategoryId" name="categoryId" />
+                <div class="modal-header bg-dark text-white">
+                    <h5 class="modal-title fw-bold" id="editCategoryModalLabel"><i class="bi bi-pencil-square me-2"></i>Chỉnh Sửa Danh Mục</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Tên Danh Mục <span class="text-danger">*</span></label>
+                        <input type="text" id="editCategoryName" name="categoryName" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Mô Tả <span class="text-danger">*</span></label>
+                        <textarea id="editDescription" name="description" class="form-control" rows="3" required></textarea>
+                    </div>
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" id="editIsActive" name="isActive" value="true" />
+                        <label class="form-check-label fw-semibold" for="editIsActive">Kích hoạt (Hiển thị)</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary fw-semibold"><i class="bi bi-check-circle me-1"></i> Cập Nhật</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function openEditModal(id, name, desc, isActive) {
+            document.getElementById('editCategoryId').value = id;
+            document.getElementById('editCategoryName').value = name;
+            document.getElementById('editDescription').value = desc;
+            document.getElementById('editIsActive').checked = isActive;
+
+            var editModal = new bootstrap.Modal(document.getElementById('editCategoryModal'));
+            editModal.show();
+        }
+    </script>
+}
