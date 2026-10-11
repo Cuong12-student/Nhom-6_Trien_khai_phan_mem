@@ -1,0 +1,31 @@
+name: CI/CD ASP.NET Core
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 1. Cài đặt môi trường .NET (chọn phiên bản tương ứng, ví dụ .NET 9)
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      # 2. Khôi phục các NuGet package
+      - name: Restore dependencies
+        run: dotnet restore
+
+      # 3. Tiến hành Build toàn bộ Solution (Bắt lỗi biên dịch, quên đóng ngoặc, thiếu thư viện)
+      - name: Build project
+        run: dotnet build --no-restore --configuration Release
+
+      # 4. Chạy Unit Test (nếu dự án có viết test)
+      - name: Run tests
+        run: dotnet test --no-build --verbosity normal
