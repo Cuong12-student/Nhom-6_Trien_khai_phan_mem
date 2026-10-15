@@ -132,7 +132,7 @@ namespace bhgbd.Areas.Client.Controllers
                         variant = new ProductVariant
                         {
                             productId = item.ProductId,
-                            name = item.ProductName,
+                            name = string.IsNullOrWhiteSpace(item.ProductName) ? $"Size {itemSize} - {item.Sole ?? "TF"}" : item.ProductName,
                             size = itemSize > 0 ? itemSize : 40,
                             soleType = string.IsNullOrEmpty(item.Sole) ? "TF" : item.Sole,
                             quantity = 100
@@ -164,7 +164,8 @@ namespace bhgbd.Areas.Client.Controllers
             catch (Exception ex)
             {
                 await transaction.RollbackAsync();
-                TempData["Error"] = "Lỗi xử lý đặt hàng: " + ex.Message;
+                var innerMsg = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
+                TempData["Error"] = "Lỗi xử lý đặt hàng: " + innerMsg;
                 return RedirectToAction("Checkout");
             }
         }

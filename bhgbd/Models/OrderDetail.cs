@@ -5,7 +5,7 @@ namespace bhgbd.Models
     public class OrderDetail
     {
         [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.None)]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int odId { get; set; }
         [Required]
         public int quantity { get; set; }

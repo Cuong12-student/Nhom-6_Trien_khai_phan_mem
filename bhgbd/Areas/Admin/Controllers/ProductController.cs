@@ -117,9 +117,14 @@ namespace bhgbd.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddVariant(int productId, string name, int size, string soleType, int quantity)
         {
-            int maxId = await _context.ProductVariants.MaxAsync(v => (int?)v.id) ?? 0;
+            int maxId = 0;
+            if (await _context.ProductVariants.AnyAsync())
+            {
+                maxId = await _context.ProductVariants.MaxAsync(v => v.id);
+            }
             var variant = new ProductVariant
             {
+                id = maxId+1,
                 productId = productId,
                 name = string.IsNullOrWhiteSpace(name) ? $"Size {size} - {soleType}" : name,
                 size = size,

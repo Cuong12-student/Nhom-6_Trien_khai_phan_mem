@@ -134,12 +134,30 @@ namespace bhgbd.Areas.Staff.Controllers
             var order = await _context.Orders.FindAsync(orderId);
             if (order != null)
             {
-                int currentUserId = HttpContext.Session.GetInt32("STAFF_ID") ?? HttpContext.Session.GetInt32("userId") ?? 1;
+                int? currentUserId = HttpContext.Session.GetInt32("userId");
+                int? actualStaffId = null;
+                if (currentUserId.HasValue)
+                {
+                    // 2. Tìm nhân viên tương ứng trong bảng Staffs theo userId
+                    var staff = await _context.Staffs.FirstOrDefaultAsync(s => s.userId == currentUserId.Value);
+                    if (staff != null)
+                    {
+                        actualStaffId = staff.staffId;
+                    }
+                }
+
+                // Nếu không tìm thấy theo userId, thử tìm một Staff mặc định đầu tiên để gán (hoặc giữ nguyên staffId cũ)
+                if (!actualStaffId.HasValue)
+                {
+                    var defaultStaff = await _context.Staffs.FirstOrDefaultAsync();
+                    actualStaffId = defaultStaff?.staffId;
+                }
+
                 order.status = status;
-                order.staffId = currentUserId;
+                order.staffId = actualStaffId; // Gán đúng staffId có thực trong bảng staffs
 
                 await _context.SaveChangesAsync();
-                TempData["Success"] = $"Cập nhật trạng thái đơn hàng #ORD-{order.orderId} thành công!";
+                TempData["Success"] = $"Cập nhật trạng thái đơn hàng #{orderId} thành công!";
             }
 
             return RedirectToAction(nameof(Detail), new { id = orderId });
