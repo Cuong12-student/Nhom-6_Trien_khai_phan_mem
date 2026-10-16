@@ -33,9 +33,9 @@ jobs:
       - name: Run tests
         run: dotnet test --no-build --verbosity normal
   # ===============================
-  # GIAI ĐOẠN CD: Triển khai lên IIS
+  # GIAI ĐOẠN CD: Triển khai lên Docker
   # ===============================
-  deploy-to-iis:
+  deploy-docker:
     needs: build-and-test
     runs-on: self-hosted
 
@@ -45,15 +45,15 @@ jobs:
 
       - name: Build Docker Image
         run: |
-          docker build -t webbanhang:latest .
+          docker build -t bhgbd:latest .
 
       - name: Run New Container
         shell: powershell
         run: |
           # 1. Dừng và xóa container cũ nếu đang chạy
-          docker rm -f webbanhang-app 2>$null
+          docker rm -f bhgbd-app 2>$null
 
-          # 2. Khởi chạy container mới
-          docker run -d --name webbanhang-app -p 80:8080 webbanhang:latest
+          # 2. Khởi chạy container mới (có hỗ trợ kết nối ngược về MySQL máy host)
+          docker run -d --name bhgbd-app --add-host=host.docker.internal:host-gateway -p 80:8080 bhgbd:latest
 
           Write-Host "Triển khai container thành công!"
