@@ -5,6 +5,9 @@ on:
     branches: [ "main" ]
 
 jobs:
+  # ===============================
+  # GIAI ĐOẠN CI: Build & Test
+  # ===============================
   build-and-test:
     runs-on: ubuntu-latest
 
@@ -29,3 +32,28 @@ jobs:
       # 4. Chạy Unit Test (nếu dự án có viết test)
       - name: Run tests
         run: dotnet test --no-build --verbosity normal
+  # ===============================
+  # GIAI ĐOẠN CD: Triển khai lên IIS
+  # ===============================
+  deploy-to-iis:
+    needs: build-and-test
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build Docker Image
+        run: |
+          docker build -t webbanhang:latest .
+
+      - name: Run New Container
+        shell: powershell
+        run: |
+          # 1. Dừng và xóa container cũ nếu đang chạy
+          docker rm -f webbanhang-app 2>$null
+
+          # 2. Khởi chạy container mới
+          docker run -d --name webbanhang-app -p 80:8080 webbanhang:latest
+
+          Write-Host "Triển khai container thành công!"
