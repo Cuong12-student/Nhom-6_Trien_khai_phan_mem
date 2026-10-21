@@ -35,25 +35,23 @@ jobs:
   # ===============================
   # GIAI ĐOẠN CD: Triển khai lên Docker
   # ===============================
-  deploy-docker:
+  docker-build-push:
     needs: build-and-test
-    runs-on: self-hosted
-
+    runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Build Docker Image
-        run: |
-          docker build -t bhgbd:latest .
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Run New Container
-        shell: powershell
-        run: |
-          # 1. Dừng và xóa container cũ nếu đang chạy
-          docker rm -f bhgbd-app 2>$null
-
-          # 2. Khởi chạy container mới (có hỗ trợ kết nối ngược về MySQL máy host)
-          docker run -d --name bhgbd-app --add-host=host.docker.internal:host-gateway -p 80:8080 bhgbd:latest
-
-          Write-Host "Triển khai container thành công!"
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/bhgbd-web:latest
