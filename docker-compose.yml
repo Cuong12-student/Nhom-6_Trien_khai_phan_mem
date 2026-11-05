@@ -1,10 +1,8 @@
-version: '3.8'
 
 services:
   bhgbd-app:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: cuong142006/bhgbd-web:latest
+    pull_policy: always
     container_name: bhgbd_net9_app
     ports:
       - "8080:8080"
@@ -20,6 +18,13 @@ services:
         reservations:
           cpus: '0.10'
           memory: 128M
+  watchtower:
+    image: containrrr/watchtower:latest
+    container_name: watchtower_autoupdate
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --interval 30 --cleanup
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:latest
     container_name: cadvisor_monitoring
