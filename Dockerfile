@@ -16,7 +16,7 @@ FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS final
 WORKDIR /app
 COPY --from=build /app/publish .
 
-# Port mặc định của .NET 8 trong container là 8080
+# Port mặc định của .NET 9 trong container là 8080
 ENV ASPNETCORE_HTTP_PORTS=8080
 EXPOSE 8080
 
