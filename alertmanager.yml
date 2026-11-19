@@ -1,0 +1,19 @@
+global:
+  smtp_smarthost: 'smtp.gmail.com:587'
+  smtp_from: 'tohuuc14@gmail.com'
+  smtp_auth_username: 'tohuuc14@gmail.com'
+  smtp_auth_password: 'gkaj xghf iakt hbob'
+  smtp_require_tls: true
+
+route:
+  group_by: ['alertname']
+  group_wait: 10s
+  group_interval: 1m
+  repeat_interval: 5m
+  receiver: 'gmail-alerts'
+
+receivers:
+  - name: 'gmail-alerts'
+    email_configs:
+      - to: 'email_nhan_canh_bao@gmail.com'
+        send_resolved: true

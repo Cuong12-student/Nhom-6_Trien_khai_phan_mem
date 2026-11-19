@@ -1,0 +1,20 @@
+groups:
+  - name: bhgbd_monitoring_rules
+    rules:
+      - alert: HighContainerCPU
+        expr: sum(rate(container_cpu_usage_seconds_total{name!=""}[1m])) by (name) * 100 > 80
+        for: 30s
+        labels:
+          severity: warning
+        annotations:
+          summary: "Quá tải CPU trên container {{ $labels.name }}"
+          description: "Container {{ $labels.name }} đang tiêu thụ trên 80% CPU trong hơn 30 giây."
+
+      - alert: WebApplicationDown
+        expr: absent(container_memory_usage_bytes{name=~".*bhgbd-app.*"})
+        for: 15s
+        labels:
+          severity: critical
+        annotations:
+          summary: "Dịch vụ web bhgbd-app ngừng hoạt động"
+          description: "Không ghi nhận dữ liệu tài nguyên từ container bhgbd-app."
