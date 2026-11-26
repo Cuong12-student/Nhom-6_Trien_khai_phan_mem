@@ -1,8 +1,8 @@
 global:
   smtp_smarthost: 'smtp.gmail.com:587'
-  smtp_from: 'your_email@gmail.com'
-  smtp_auth_username: 'your_email@gmail.com'
-  smtp_auth_password: 'YOUR_16_CHAR_APP_PASSWORD'
+  smtp_from: 'tohuuc14@gmail.com'
+  smtp_auth_username: 'tohuuc14@gmail.com'
+  smtp_auth_password: 'gkaj xghf iakt hbob'
   smtp_require_tls: true
 
 route:
@@ -15,5 +15,23 @@ route:
 receivers:
   - name: 'gmail-alerts'
     email_configs:
-      - to: 'email_nhan_canh_bao@gmail.com'
+      - to: 'tohuuc14@gmail.com'
         send_resolved: true
+        headers:
+          Subject: '[Hệ thống BHGBD] {{ if eq .Status "firing" }}CẢNH BÁO SỰ CỐ{{ else }}ĐÃ KHÔI PHỤC{{ end }}: {{ .CommonLabels.alertname }}'
+        html: |
+          <div style="font-family: Arial, sans-serif; max-width: 600px; border: 1px solid #ddd; border-radius: 8px; overflow: hidden;">
+            <div style="background-color: {{ if eq .Status "firing" }}#d9534f{{ else }}#28a745{{ end }}; color: white; padding: 15px; font-size: 18px; font-weight: bold;">
+              {{ if eq .Status "firing" }}🚨 PHÁT HIỆN SỰ CỐ HỆ THỐNG{{ else }}✅ HỆ THỐNG ĐÃ HOẠT ĐỘNG TRỞ LẠI{{ end }}
+            </div>
+            <div style="padding: 20px; line-height: 1.6; color: #333;">
+              {{ range .Alerts }}
+                <p><strong>Loại cảnh báo:</strong> {{ .Labels.alertname }} (Mức độ: {{ .Labels.severity }})</p>
+                <p><strong>Tóm tắt:</strong> {{ .Annotations.summary }}</p>
+                <p><strong>Chi tiết:</strong> {{ .Annotations.description }}</p>
+                <p><strong>Thời gian ghi nhận:</strong> {{ .StartsAt.Format "15:04:05 02/01/2006" }}</p>
+                <hr style="border: 0; border-top: 1px solid #eee;">
+              {{ end }}
+              <p style="font-size: 12px; color: #777;">Email tự động từ hệ thống giám sát Prometheus & Alertmanager - Dự án BHGBD.</p>
+            </div>
+          </div>
